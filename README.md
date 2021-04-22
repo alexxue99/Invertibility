@@ -10,6 +10,6 @@ With Gradle, the following two commands may be used to compile Main.java and cre
 "gradle build"<br/>
 "gradle jar"
 
-The created .jar file is \app\build\libs\app.jar, which can be run using <br/>
-"java -jar \app\build\libs\app.jar"
+The created .jar file is \app\build\libs\app.jar, which can be run using<br/>
+"java -jar \app\build\libs\app.jar"<br/>
 from the project directory.
