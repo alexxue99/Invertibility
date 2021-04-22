@@ -6,10 +6,10 @@ The class Main.java contains two examples on how to use the application. Example
 
 This project uses Gradle to handle the JFreeChart dependency. If the user has no need to plot data on multiple trials, then the user does not need to import the whole project. The user will only need the files Chart.java, Invert.java, and TreeSimul.java, all found at \app\src\main\java\invertibility\. If the user wants to view the charts and already has JFreeChart installed, then the user can handle the dependency themselves. The user will only need the file Main.java, in addition to the three files mentioned above.
 
-With Gradle, the following commands may be used to compile Main.java and create a .jar file:
-"gradle build"
+With Gradle, the following two commands may be used to compile Main.java and create a .jar file:<br/>
+"gradle build"<br/>
 "gradle jar"
 
-The created .jar file is \app\build\libs\app.jar, which can be run using 
+The created .jar file is \app\build\libs\app.jar, which can be run using <br/>
 "java -jar \app\build\libs\app.jar"
 from the project directory.
