@@ -1,24 +1,27 @@
 package invertibility;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 
-import invertibility.TreeSimul.Leaf;
-
+/**
+ * Class used to invert the length process parameters, given the lengths of the
+ * sequences at the leaves of a tree.
+ */
 public class Invert {
-	private TreeSimul tree;
-	private double[] C;
+	final static int DIVISION_PRECISION = 8; // number of decimal digits in divisions
+	private TreeLeaves tree;
+	private BigDecimal[] C;
 	private double C2prime;
 	private double C3prime;
 	private double gamma;
 	private double beta;
-	private double nuT;
-	private double pi0;
 	private double M;
 
-	public Invert(TreeSimul tree) {
+	public Invert(TreeLeaves tree) {
 		this.tree = tree;
-		C = new double[3];
+		C = new BigDecimal[3];
 		invert();
 	}
 
@@ -29,48 +32,69 @@ public class Invert {
 	 * each leaf is some constant t (i.e. the tree is ultrametric).
 	 */
 	private void calcC() {
-		LinkedList<Leaf> seqLeaves = tree.getSeqLeaves();
-		Iterator<Leaf> leafIter = seqLeaves.iterator();
+		List<Integer> seqLeavesLengths = tree.getSeqLeavesLengths();
+		Iterator<Integer> leafIter = seqLeavesLengths.iterator();
 
 		// estimate partials of G(z, t) with respect to z and evaluated at z = 1 and
 		// time t,
 		// by using the expected value of the kth factorial moment of the length process
-		double[] partials = new double[3];
+		BigDecimal[] partial = new BigDecimal[3];
+		for (int k = 0; k < 3; k++)
+			partial[k] = new BigDecimal(0);
 
 		while (leafIter.hasNext()) {
-			int length = leafIter.next().getSequence().length();
-			partials[0] += length;
-			partials[1] += length * (length - 1);
-			partials[2] += length * (length - 1) * (length - 2);
+			int length = leafIter.next();
+			partial[0] = partial[0].add(new BigDecimal(length));
+			partial[1] = partial[1].add(new BigDecimal(length * (length - 1)));
+			partial[2] = partial[2].add(new BigDecimal(length * (length - 1) * (length - 2)));
 		}
 
 		for (int k = 0; k < 3; k++)
-			partials[k] /= seqLeaves.size();
+			partial[k] = partial[k].divide(new BigDecimal(seqLeavesLengths.size()), DIVISION_PRECISION, RoundingMode.HALF_UP);
 
-		C[0] = partials[0];
-		C[1] = partials[1] - partials[0] * partials[0];
-		C[2] = partials[2] + 2 * Math.pow(partials[0], 3) - 3 * partials[0] * partials[1];
+		C[0] = partial[0];
+		C[1] = partial[1].subtract(partial[0].pow(2));
+		C[2] = partial[2].add(new BigDecimal(2).multiply(partial[0].pow(3)))
+				.subtract(new BigDecimal(3).multiply(partial[0].multiply(partial[1])));
 
-		C2prime = C[1] / C[0];
-		C3prime = C[2] / C[0];
+		if (C[0].equals(new BigDecimal(0))) {
+			C2prime = Double.NaN;
+			C3prime = Double.NaN;
+		} else {
+			C2prime = C[1].divide(C[0], DIVISION_PRECISION, RoundingMode.HALF_UP).doubleValue();
+			C3prime = C[2].divide(C[0], DIVISION_PRECISION, RoundingMode.HALF_UP).doubleValue();
+		}
 	}
 
 	/** Estimates gamma. */
 	private void estimateGamma() {
 		gamma = Math.sqrt(-(C2prime + 1) * (C2prime + 1) * (3 * C2prime * C2prime - 2 * C3prime));
 		gamma += -C2prime * C2prime + C2prime + C3prime;
-		gamma /= 2 * C2prime * C2prime + 2 * C2prime - C3prime + 2;
+
+		try {
+			gamma /= 2 * C2prime * C2prime + 2 * C2prime - C3prime + 2;
+		} catch (ArithmeticException e) {
+			gamma = Double.NaN;
+		}
 	}
 
 	/** Estimates beta. */
 	private void estimateBeta() {
 		beta = gamma * (2 + C2prime) - C2prime;
-		beta /= 1 + gamma;
+
+		try {
+			beta /= 1 + gamma;
+		} catch (ArithmeticException e) {
+			beta = Double.NaN;
+		}
 	}
 
 	/** Estimates M. */
 	private void estimateM() {
-		M = C[0] / beta;
+		if (Double.isNaN(beta) || beta == 0)
+			M = Double.NaN;
+		else
+			M = C[0].divide(new BigDecimal(beta), DIVISION_PRECISION, RoundingMode.HALF_UP).doubleValue();
 	}
 
 	/**
@@ -89,14 +113,6 @@ public class Invert {
 
 	public double getBeta() {
 		return beta;
-	}
-
-	public double getNuT() {
-		return nuT;
-	}
-
-	public double getPi0() {
-		return pi0;
 	}
 
 	public double getM() {

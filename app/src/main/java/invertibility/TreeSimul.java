@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.stream.Collectors;
 
+/** Class used to simulate the length process, given a tree. */
 public class TreeSimul {
 	private double lambda;
 	private double mu;
@@ -155,7 +157,10 @@ public class TreeSimul {
 		return (rand.nextDouble() <= pi0) ? '0' : '1';
 	}
 
-	/** Evolves string s along an edge for time t, using the length process parameters. */
+	/**
+	 * Evolves string s along an edge for time t, using the length process
+	 * parameters.
+	 */
 	private String evolve(String s, double t) {
 		while (t > 0) {
 			double[] timings = new double[s.length() * 3];
@@ -215,6 +220,13 @@ public class TreeSimul {
 	/** Simulates the length process on the whole tree. */
 	public void runLengthProcess() {
 		runFromVertex(rootVertex);
+	}
+
+	/**
+	 * Transforms a TreeSimul object into a TreeLeaves object.
+	 */
+	public TreeLeaves toTreeLeaves() {
+		return new TreeLeaves(seqLeaves.stream().map(leaf -> leaf.getSequence().length()).collect(Collectors.toList()));
 	}
 
 	public double getLambda() {

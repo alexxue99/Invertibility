@@ -14,6 +14,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+/** Class used to chart estimated data vs. actual values. */
 public class Chart {
 
 	@SuppressWarnings("serial")

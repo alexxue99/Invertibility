@@ -1,56 +1,35 @@
 package invertibility;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import invertibility.TreeSimul.Edge;
 
 public class Main {
 	/**
-	 * Basic example to show how to input a tree, invert it, and print out the
-	 * estimated parameters.
+	 * Basic example to show how to input the lengths of the sequences at the leaves
+	 * of a tree, invert the length process, and print out the estimated parameters.
 	 */
 	public static void example1() {
 		System.out.println("Starting example 1...\n");
-		// set length process parameters
-		double lambda = 0.7;
-		double mu = 1;
-		double nu = 3;
-		double pi0 = 0.3;
-		double time = 1;
-		String root = "0110";
-		int rootVertex = 0;
 
-		// set number of leaves for tree
+		List<Integer> seqLeavesLengths = new LinkedList<Integer>();
+		for (int i = 0; i < 50; i++)
+			seqLeavesLengths.add(1000 + i);
 
-		int num = 1000;
-		// set the actual values for M, gamma, and beta
-		int M = root.length();
-		double gamma = lambda / mu;
-		double beta = Math.exp((lambda - mu) * time);
+		TreeLeaves exampleTree = new TreeLeaves(seqLeavesLengths);
+		Invert exampleInverted = new Invert(exampleTree);
 
-		// set the directed edges for the star tree
-		LinkedList<Edge> edges = new LinkedList<Edge>();
-		double[] t = new double[num];
-		for (int i = 0; i < num; i++) {
-			edges.add(new Edge(0, i + 1));
-			t[i] = time;
-		}
-
-		TreeSimul example = new TreeSimul(lambda, mu, nu, pi0, rootVertex, root, edges, t);
-		Invert exampleInverted = new Invert(example);
-
-		// Print out estimated and actual parameters.
-		// Some of the estimated parameters may show to be NaN because the calculations
-		// may take the square root of a negative number.
+		// Print out estimated parameters.
 		System.out.println("Estimated gamma is " + exampleInverted.getGamma() + ".");
-		System.out.println("Actual gamma is " + gamma + ".");
 		System.out.println("Estimated beta is " + exampleInverted.getBeta() + ".");
-		System.out.println("Actual beta is " + beta + ".");
-		System.out.println("Estimated M is " + exampleInverted.getM() + ".");
-		System.out.println("Actual M is " + M + ".\n");
+		System.out.println("Estimated M is " + exampleInverted.getM() + ".\n");
 	}
 
-	/** Example to show how to run trials on a variable number of leaves. */
+	/**
+	 * Example to show how to run trials on a variable number of leaves, using the
+	 * length process simulator TreeSimul.
+	 */
 	public static void example2() {
 		System.out.println("Starting example 2...");
 		// set length process parameters
@@ -94,7 +73,8 @@ public class Main {
 			}
 
 			TreeSimul example = new TreeSimul(lambda, mu, nu, pi0, rootVertex, root, edges, t);
-			Invert exampleInverted = new Invert(example);
+			TreeLeaves exampleTree = example.toTreeLeaves();
+			Invert exampleInverted = new Invert(exampleTree);
 
 			N[trial] = num;
 			g[trial] = exampleInverted.getGamma();
@@ -102,7 +82,7 @@ public class Main {
 			m[trial] = exampleInverted.getM();
 		}
 
-		// display charts for the data
+		// display charts
 		Chart.chart("Gamma vs. N", "gamma", g, gamma, N);
 		Chart.chart("Beta vs. N", "beta", b, beta, N);
 		Chart.chart("M vs. N", "M", m, M, N);
