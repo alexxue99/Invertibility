@@ -12,13 +12,13 @@ plugins {
 }
 
 repositories {
-    // Use JCenter for resolving dependencies.
-    jcenter()
+    // Use mavenCentral for resolving dependencies.
+    mavenCentral()
 }
 
 dependencies {
     // Use JUnit test framework.
-    testImplementation 'junit:junit:4.13'
+    // testImplementation 'junit:junit:4.13'
 
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:29.0-jre'
@@ -26,19 +26,23 @@ dependencies {
     implementation fileTree(dir: 'deps', include: '*.jar')
 }
 
-mainClassName = 'invertibility.Main'
 
 application {
     // Define the main class for the application.
-    mainClass = "$mainClassName"
+    mainClass.set("invertibility.Main")
 }
 
 jar {
   manifest { 
-    attributes "Main-Class": "$mainClassName"
+    attributes "Main-Class": "invertibility.Main"
   }  
 
   from {
     configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
   }
+}
+
+task runJar(type: JavaExec) {
+    mainClass = "-jar";
+    args jar.archiveFile.get()
 }

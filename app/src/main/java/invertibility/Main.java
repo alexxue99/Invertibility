@@ -31,20 +31,23 @@ public class Main {
 	 * length process simulator TreeSimul.
 	 */
 	public static void example2() {
-		System.out.println("Starting example 2...");
+		System.out.println("Starting example 2... HI");
 		// set length process parameters
-		double lambda = 0.7;
-		double mu = 1;
+		double lambda = 1;
+		double mu = 0.7;
 		double nu = 3;
 		double pi0 = 0.3;
 		double time = 1;
-		String root = "0110";
+		String root = "01000000";
 		int rootVertex = 0;
 
 		// set max number of leaves and step size for number of leaves in each trial
-		int maxN = 5000;
+		int maxN = 20000;
 		int stepSize = 100;
-		int numIter = maxN / stepSize;
+		
+		//int [] Ns = {1000, 10000, 100000, 1000000, 10000000};
+		int[] Ns = {1000, 10000};
+		int numIter = Ns.length;
 
 		// initialize arrays
 		// N is the number of leaves for each trial (so it will contain 100, 200, 300,
@@ -56,14 +59,24 @@ public class Main {
 		double[] g = new double[numIter];
 		double[] b = new double[numIter];
 		double[] m = new double[numIter];
+		double[] C1 = new double[numIter];
+		double[] C2 = new double[numIter];
+		double[] C3 = new double[numIter];
 
 		// set the actual values for M, gamma, and beta
 		int M = root.length();
 		double gamma = lambda / mu;
 		double beta = Math.exp((lambda - mu) * time);
 
+		double c1 = beta * M;
+		double c2 = beta * (2 * gamma - beta * gamma - beta) / (1 - gamma) * M;
+		double c3 = 2 * beta * (beta * beta * gamma * gamma + beta * beta * gamma + beta * beta
+				- 3 * beta * gamma * gamma - 3 * beta * gamma + 3 * gamma * gamma) / ((1 - gamma) * (1 - gamma)) * M;
+
 		// run trials
-		for (int num = stepSize, trial = 0; num <= maxN; num += stepSize, trial++) {
+		for (int trial = 0; trial < numIter; trial++) {
+			int num = Ns[trial];
+			System.out.println("Current trial: " + trial);
 			// set the directed edges for the star tree
 			LinkedList<Edge> edges = new LinkedList<Edge>();
 			double[] t = new double[num];
@@ -76,16 +89,29 @@ public class Main {
 			TreeLeaves exampleTree = example.toTreeLeaves();
 			Invert exampleInverted = new Invert(exampleTree);
 
-			N[trial] = num;
+			N[trial] = trial+3;
 			g[trial] = exampleInverted.getGamma();
 			b[trial] = exampleInverted.getBeta();
 			m[trial] = exampleInverted.getM();
+
+			double[] Cs = exampleInverted.getCs();
+			C1[trial] = Cs[0];
+			C2[trial] = Cs[1];
+			C3[trial] = Cs[2];
 		}
 
+		// for (int num = stepSize, trial = 0; num <= maxN; num+= stepSize, trial++) {
+		// System.out.println("trial " + trial + ": " + g[trial]);
+		// }
+
 		// display charts
-		Chart.chart("Gamma vs. N", "gamma", g, gamma, N);
-		Chart.chart("Beta vs. N", "beta", b, beta, N);
-		Chart.chart("M vs. N", "M", m, M, N);
+		Chart.chart("Gamma vs. log N", "gamma", g, gamma, N);
+		Chart.chart("Beta vs. log N", "beta", b, beta, N);
+		Chart.chart("M vs. log N", "M", m, M, N);
+
+		Chart.chart("C1 vs. log N", "C1", C1, c1, N);
+		Chart.chart("C2 vs. log N", "C2", C2, c2, N);
+		Chart.chart("C3 vs. log N", "C3", C3, c3, N);
 	}
 
 	public static void main(String[] args) {

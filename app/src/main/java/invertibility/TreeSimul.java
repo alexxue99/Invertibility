@@ -22,7 +22,7 @@ public class TreeSimul {
 	private LinkedList<Leaf> seqLeaves; // contains information about the sequences at the leaves
 
 	/**
-	 * Class that represents a vertex and a time of a directed edge ending at that
+	 * Class that represents a vertex and the time corresponding to a directed edge ending at the
 	 * vertex.
 	 */
 	private static class TimeToVertex {
@@ -207,7 +207,8 @@ public class TreeSimul {
 	/** Simulates the length process starting from vertex curVertex. */
 	private void runFromVertex(int curVertex) {
 		Iterator<TimeToVertex> iter = adj.getOrDefault(curVertex, new LinkedList<TimeToVertex>()).iterator();
-		if (!iter.hasNext()) // curVertex is a leaf
+
+		if (!iter.hasNext()) // curVertex is a leaf 
 			seqLeaves.add(new Leaf(curVertex, seq.get(curVertex)));
 
 		while (iter.hasNext()) {

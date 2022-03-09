@@ -1,6 +1,6 @@
 package invertibility;
 
-import static org.junit.Assert.assertEquals;
+// import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class TreeLeaves {
 
 	// Prereq: at least one leaf length must be given.
 	public TreeLeaves(List<Integer> seqLeavesLengths) {
-		assertEquals(seqLeavesLengths.size() > 0, true);
+		// assertEquals(seqLeavesLengths.size() > 0, true);
 		this.seqLeavesLengths = seqLeavesLengths;
 	}
 

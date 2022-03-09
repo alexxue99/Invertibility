@@ -1,6 +1,5 @@
 package invertibility;
 
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Iterator;
 import java.util.List;
@@ -12,7 +11,8 @@ import java.util.List;
 public class Invert {
 	final static int DIVISION_PRECISION = 8; // number of decimal digits in divisions
 	private TreeLeaves tree;
-	private BigDecimal[] C;
+	private double[] C;
+	private double[] partial;
 	private double C2prime;
 	private double C3prime;
 	private double gamma;
@@ -21,7 +21,8 @@ public class Invert {
 
 	public Invert(TreeLeaves tree) {
 		this.tree = tree;
-		C = new BigDecimal[3];
+		C = new double[3];
+		partial = new double[3];
 		invert();
 	}
 
@@ -38,31 +39,40 @@ public class Invert {
 		// estimate partials of G(z, t) with respect to z and evaluated at z = 1 and
 		// time t,
 		// by using the expected value of the kth factorial moment of the length process
-		BigDecimal[] partial = new BigDecimal[3];
-		for (int k = 0; k < 3; k++)
-			partial[k] = new BigDecimal(0);
+		
+		long[] curSum = new long[3];
 
 		while (leafIter.hasNext()) {
-			int length = leafIter.next();
-			partial[0] = partial[0].add(new BigDecimal(length));
-			partial[1] = partial[1].add(new BigDecimal(length * (length - 1)));
-			partial[2] = partial[2].add(new BigDecimal(length * (length - 1) * (length - 2)));
+			long length = (long) leafIter.next();
+			long[] lengths = new long[] { length, length * (length - 1), length * (length - 1) * (length - 2) };
+
+			for (int i = 0; i < 3; i++) {
+				try {
+					curSum[i] = Math.addExact(curSum[i], lengths[i]);
+				} catch (ArithmeticException e) {
+					partial[i] += (double) curSum[i] / seqLeavesLengths.size();
+					curSum[i] = lengths[i];
+				}
+			}
 		}
 
-		for (int k = 0; k < 3; k++)
-			partial[k] = partial[k].divide(new BigDecimal(seqLeavesLengths.size()), DIVISION_PRECISION, RoundingMode.HALF_UP);
+		// System.out.println("partial: " + partial[0]);
+		// System.out.println("size: " + seqLeavesLengths.size());
+		for (int i = 0; i < 3; i++)
+			partial[i] += (double) curSum[i] / seqLeavesLengths.size();
 
 		C[0] = partial[0];
-		C[1] = partial[1].subtract(partial[0].pow(2));
-		C[2] = partial[2].add(new BigDecimal(2).multiply(partial[0].pow(3)))
-				.subtract(new BigDecimal(3).multiply(partial[0].multiply(partial[1])));
+		// System.out.println("co: " + C[0]);
+		C[1] = partial[1] - partial[0]*partial[0];
+		C[2] = partial[2] + 2*Math.pow(partial[0], 3) - 3 * partial[0] * partial[1];
 
-		if (C[0].equals(new BigDecimal(0))) {
+		if (C[0] == 0) {
 			C2prime = Double.NaN;
 			C3prime = Double.NaN;
+			System.out.println("here1");
 		} else {
-			C2prime = C[1].divide(C[0], DIVISION_PRECISION, RoundingMode.HALF_UP).doubleValue();
-			C3prime = C[2].divide(C[0], DIVISION_PRECISION, RoundingMode.HALF_UP).doubleValue();
+			C2prime = C[1] / C[0];
+			C3prime = C[2] / C[0];
 		}
 	}
 
@@ -74,6 +84,7 @@ public class Invert {
 		try {
 			gamma /= 2 * C2prime * C2prime + 2 * C2prime - C3prime + 2;
 		} catch (ArithmeticException e) {
+			// System.out.println("here2");
 			gamma = Double.NaN;
 		}
 	}
@@ -85,6 +96,7 @@ public class Invert {
 		try {
 			beta /= 1 + gamma;
 		} catch (ArithmeticException e) {
+			// System.out.println("here3");
 			beta = Double.NaN;
 		}
 	}
@@ -94,7 +106,7 @@ public class Invert {
 		if (Double.isNaN(beta) || beta == 0)
 			M = Double.NaN;
 		else
-			M = C[0].divide(new BigDecimal(beta), DIVISION_PRECISION, RoundingMode.HALF_UP).doubleValue();
+			M = Math.round(C[0] / beta);
 	}
 
 	/**
@@ -117,5 +129,9 @@ public class Invert {
 
 	public double getM() {
 		return M;
+	}
+
+	public double[] getCs() {
+		return C;
 	}
 }
