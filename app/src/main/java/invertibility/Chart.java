@@ -1,107 +1,116 @@
 package invertibility;
 
 import java.awt.Color;
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.chart.ui.ApplicationFrame;
-import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
+import org.jfree.chart.renderer.xy.XYErrorRenderer;
+import org.jfree.chart.swing.ApplicationFrame;
+import org.jfree.chart.swing.ChartPanel;
+import org.jfree.data.statistics.BoxAndWhiskerCalculator;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.XYIntervalDataItem;
+import org.jfree.data.xy.XYIntervalSeries;
+import org.jfree.data.xy.XYIntervalSeriesCollection;
 
 /** Class used to chart estimated data vs. actual values. */
 public class Chart {
 
-	@SuppressWarnings("serial")
 	static class Chart_AWT extends ApplicationFrame {
 
-		public Chart_AWT(String applicationTitle, String chartTitle, String var, double[] estimated, double actual,
+	//	// box and whisker chart
+	// 	public Chart_AWT(String applicationTitle, String chartTitle, String var, double[][] estimated, double actual,
+	// 			int[] N) {
+	// 		super(applicationTitle);
+
+	// 		DefaultBoxAndWhiskerCategoryDataset<String, String> data = new DefaultBoxAndWhiskerCategoryDataset<String, String>();
+
+	// 		for (int i = 0; i < N.length; i++) {
+	// 			data.add(
+	// 					BoxAndWhiskerCalculator.calculateBoxAndWhiskerStatistics(
+	// 							DoubleStream.of(estimated[i]).boxed().collect(Collectors.toList())),
+	// 					String.valueOf(N[i]), var);
+	// 		}
+
+	// 		JFreeChart chart = ChartFactory.createBoxAndWhiskerChart(
+	// 				chartTitle, "log N", var, data, false);
+
+	// 		ChartPanel chartPanel = new ChartPanel(chart);
+	// 		chartPanel.setPreferredSize(new java.awt.Dimension(480, 367));
+
+	// 		setContentPane(chartPanel);
+	// 	}
+
+		// error bar chart
+		public Chart_AWT(String applicationTitle, String chartTitle, String var, double[] estimated,
+				double[] estimatedUpper, double[] estimatedLower, double actual,
 				int[] N) {
 			super(applicationTitle);
-			// JFreeChart chart = ChartFactory.createScatterPlot(chartTitle, "log N", var,
-			// createDataset(estimated, N),
-			// PlotOrientation.VERTICAL, true, true, false);
-			JFreeChart chart = ChartFactory.createBoxAndWhiskerChart(chartTitle, "log N", var,
-					createDataset(estimated, N),
-					true);
 
-			// XYPlot plot = (XYPlot) chart.getPlot();
-			// XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+			XYIntervalSeriesCollection<String> valuesDataSet = new XYIntervalSeriesCollection<String>();
+			XYIntervalSeries<String> values = new XYIntervalSeries<String>("values");
+			System.out.println("------\n" + var);
+			for (int i = 0; i < N.length; i++) {
+				XYIntervalDataItem val;
+				System.out.println(estimated[i] + " " + estimatedUpper[i] + " " + estimatedLower[i]);
+				if (estimatedUpper[i] > estimatedLower[i])
+					val = new XYIntervalDataItem(N[i], N[i], N[i], estimated[i], estimatedLower[i],
+							estimatedUpper[i]);
+				else
+					val = new XYIntervalDataItem(N[i], N[i], N[i], estimated[i], estimatedUpper[i],
+							estimatedLower[i]);
+				values.add(val, true);
+			}
 
-			// renderer.setSeriesLinesVisible(0, false); // remove lines for estimated data
-			// final double CIRCLE_RADIUS = 2.5;
-			// Shape circle = new Ellipse2D.Double(-CIRCLE_RADIUS, -CIRCLE_RADIUS, 2 * CIRCLE_RADIUS, 2 * CIRCLE_RADIUS);
-			// renderer.setSeriesShape(0, circle); // set estimated data shape to be circle (default is square)
+			valuesDataSet.addSeries(values);
 
-			// renderer.setSeriesShapesVisible(1, false); // set actual data shape to be a line
-			// renderer.setSeriesPaint(1, Color.BLUE);
+			XYIntervalSeries<String> actualValue = new XYIntervalSeries<String>("actual");
+			valuesDataSet.addSeries(actualValue);
 
-			// plot.setRenderer(renderer);
+			JFreeChart chart = ChartFactory.createScatterPlot(chartTitle, "log N", var, valuesDataSet,
+					PlotOrientation.VERTICAL,
+					true, false, false);
 
-			// plot.setBackgroundPaint(Color.WHITE);
+			XYPlot<String> plot = (XYPlot<String>) chart.getPlot();
+			XYErrorRenderer errorRenderer = new XYErrorRenderer();
+			plot.setRenderer(errorRenderer);
 
-			// ValueMarker marker = new ValueMarker(actual);
-			// marker.setPaint(Color.BLUE);
+			ValueMarker marker = new ValueMarker(actual);
+			marker.setPaint(Color.BLUE);
+			plot.addRangeMarker(marker);
+			errorRenderer.setSeriesPaint(1, Color.BLUE);
+			errorRenderer.setSeriesLinesVisible(1, true);
+			errorRenderer.setSeriesShapesVisible(1, false);
 
-			// plot.addRangeMarker(marker);
+			plot.setBackgroundPaint(Color.WHITE);
 
 			ChartPanel chartPanel = new ChartPanel(chart);
 			chartPanel.setPreferredSize(new java.awt.Dimension(480, 367));
 
 			setContentPane(chartPanel);
 		}
-
-		private XYDataset createDataset2(double[] estimated, int[] N) {
-			XYSeriesCollection dataset = new XYSeriesCollection();
-			XYSeries estimatedSeries = new XYSeries("estimated");
-
-			for (int i = 0; i < N.length; i++) {
-				estimatedSeries.add(N[i], estimated[i]);
-			}
-
-			dataset.addSeries(estimatedSeries);
-			dataset.addSeries(new XYSeries("actual"));
-			return dataset;
-		}
-
-		private BoxAndWhiskerCategoryDataset createDataset(double[] estimated, int[] N) {
-			final int entityCount = 22;
-
-			final DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
-
-			for (int i = 0; i < N.length; i++) {
-				final List<Integer> list = new ArrayList<Integer>();
-				// add some values...
-				for (int k = 0; k < entityCount; k++) {
-					final int value1 = 10 + (int) (Math.random() * 3);
-					list.add(value1);
-					final int value2 = 15;
-					list.add(value2);
-				}
-
-				dataset.add(list, "", " Type " + i);
-				dataset.add(new ArrayList<Integer>(), "", "Actual");
-			}
-
-			return dataset;
-		}
-
 	}
 
-	public static void chart(String chartTitle, String var, double[] estimated, double actual, int[] N) {
-		Chart_AWT chart = new Chart_AWT(chartTitle, chartTitle, var, estimated, actual, N);
+	public static void ErrorChart(String chartTitle, String var, double[] estimated, double[] estimatedUpper,
+			double[] estimatedLower,
+			double actual, int[] N) {
+		Chart_AWT chart = new Chart_AWT(chartTitle, chartTitle, var, estimated, estimatedUpper, estimatedLower, actual,
+				N);
 		chart.pack();
 		chart.setVisible(true);
 	}
+
+	// public static void BoxAndWhiskerChart(String chartTitle, String var, double[][] estimated,
+	// 		double actual, int[] N) {
+	// 	Chart_AWT chart = new Chart_AWT(chartTitle, chartTitle, var, estimated, actual,
+	// 			N);
+	// 	chart.pack();
+	// 	chart.setVisible(true);
+	// }
+
 }
