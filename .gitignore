@@ -9,6 +9,7 @@ app/bin/
 .classpath
 .project
 .settings/*
+*.prefs
 
 # ignore compile artifacts
 *.java~
