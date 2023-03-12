@@ -47,7 +47,7 @@ public class Chart {
 	// 	}
 
 		// error bar chart
-		public Chart_AWT(String applicationTitle, String chartTitle, String var, double[] estimated,
+		public Chart_AWT(String xAxis, String applicationTitle, String chartTitle, String var, double[] estimated,
 				double[] estimatedUpper, double[] estimatedLower, double actual,
 				int[] N) {
 			super(applicationTitle);
@@ -72,7 +72,7 @@ public class Chart {
 			XYIntervalSeries<String> actualValue = new XYIntervalSeries<String>("actual");
 			valuesDataSet.addSeries(actualValue);
 
-			JFreeChart chart = ChartFactory.createScatterPlot(chartTitle, "log N", var, valuesDataSet,
+			JFreeChart chart = ChartFactory.createScatterPlot(chartTitle, xAxis, var, valuesDataSet,
 					PlotOrientation.VERTICAL,
 					true, false, false);
 
@@ -83,6 +83,8 @@ public class Chart {
 			ValueMarker marker = new ValueMarker(actual);
 			marker.setPaint(Color.BLUE);
 			plot.addRangeMarker(marker);
+			errorRenderer.setSeriesPaint(0, Color.RED);
+
 			errorRenderer.setSeriesPaint(1, Color.BLUE);
 			errorRenderer.setSeriesLinesVisible(1, true);
 			errorRenderer.setSeriesShapesVisible(1, false);
@@ -90,16 +92,16 @@ public class Chart {
 			plot.setBackgroundPaint(Color.WHITE);
 
 			ChartPanel chartPanel = new ChartPanel(chart);
-			chartPanel.setPreferredSize(new java.awt.Dimension(480, 367));
+			chartPanel.setPreferredSize(new java.awt.Dimension(540, 360));
 
 			setContentPane(chartPanel);
 		}
 	}
 
-	public static void ErrorChart(String chartTitle, String var, double[] estimated, double[] estimatedUpper,
+	public static void ErrorChart(String xAxis, String var, double[] estimated, double[] estimatedUpper,
 			double[] estimatedLower,
 			double actual, int[] N) {
-		Chart_AWT chart = new Chart_AWT(chartTitle, chartTitle, var, estimated, estimatedUpper, estimatedLower, actual,
+		Chart_AWT chart = new Chart_AWT(xAxis, var + " vs. " + xAxis, "", var, estimated, estimatedUpper, estimatedLower, actual,
 				N);
 		chart.pack();
 		chart.setVisible(true);

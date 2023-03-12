@@ -22,35 +22,38 @@ public class Invert {
 		this.tree = tree;
 		partial = new double[3];
 		C = new double[3];
-		invert();
-	}
 
-	/**
-	 * Inverts the process based on given data on partials
-	 */
-	public Invert(double[] partial) {
-		this.partial = partial;
-		C = new double[3];
+		calcPartials();
 		updateCs();
 
 		estimateGamma();
 		estimateBeta();
 		estimateM();
 	}
-	
+
 	/**
-	 * Calculates C<SUB>1</SUB>, C<SUB>2</SUB>, C<SUB>3</SUB>, and stores them in
-	 * array C. Also calculates C<SUB>2</SUB>' and C<SUB>3</SUB>', and stores them
-	 * in C2prime and C3prime, respectively. Assumes that the time from the root to
-	 * each leaf is some constant t (i.e. the tree is ultrametric).
+	 * Inverts the process based on given data on the lengths of the sequences at
+	 * the leaves.
 	 */
-	private void calcC() {
-		calcPartials();
+	public Invert(List<Integer> seqLeavesLengths) {
+		partial = new double[3];
+		C = new double[3];
+
+		calcPartials(seqLeavesLengths);
 		updateCs();
+
+		estimateGamma();
+		estimateBeta();
+		estimateM();
 	}
 
 	private void calcPartials() {
 		List<Integer> seqLeavesLengths = tree.getSeqLeavesLengths();
+		calcPartials(seqLeavesLengths);
+	}
+
+	private void calcPartials(List<Integer> seqLeavesLengths) {
+
 		Iterator<Integer> leafIter = seqLeavesLengths.iterator();
 
 		// estimate partials of G(z, t) with respect to z and evaluated at z = 1 and
@@ -58,17 +61,21 @@ public class Invert {
 		// by using the expected value of the kth factorial moment of the length process
 
 		long[] curSum = new long[3];
-
+		int t = 1;
 		while (leafIter.hasNext()) {
 			long length = (long) leafIter.next();
 			long[] lengths = new long[] { length, length * (length - 1), length * (length - 1) * (length - 2) };
 
 			for (int i = 0; i < 3; i++) {
 				try {
-					curSum[i] = Math.addExact(curSum[i], lengths[i]);
+					// curSum[i] = Math.addExact(curSum[i], lengths[i]);
+					partial[i] += (lengths[i] - partial[i]) / t;
+					if (i == 2)
+						t++;
 				} catch (ArithmeticException e) {
-					partial[i] += (double) curSum[i] / seqLeavesLengths.size();
-					curSum[i] = lengths[i];
+					System.out.println("PARTIALS");
+					// partial[i] += curSum[i] / (double) seqLeavesLengths.size();
+					// curSum[i] = lengths[i];
 				}
 			}
 		}
@@ -76,10 +83,10 @@ public class Invert {
 		// System.out.println("partial: " + partial[0]);
 		// System.out.println("size: " + seqLeavesLengths.size());
 		// System.out.println("PARTIALS");
-		for (int i = 0; i < 3; i++) {
-			partial[i] += (double) curSum[i] / seqLeavesLengths.size();
-			// System.out.println(partial[i]);
-		}
+		// for (int i = 0; i < 3; i++) {
+		// 	// partial[i] += curSum[i] / (double) seqLeavesLengths.size();
+		// 	System.out.println(i + " " + partial[i]);
+		// }
 	}
 
 	/* Prereq: partials are calculated */
@@ -116,7 +123,7 @@ public class Invert {
 		try {
 			gamma /= 2 * C2prime * C2prime + 2 * C2prime - C3prime + 2;
 		} catch (ArithmeticException e) {
-			// System.out.println("here2");
+			System.out.println("here2");
 			gamma = Double.NaN;
 		}
 	}
@@ -128,29 +135,20 @@ public class Invert {
 		try {
 			beta /= 1 + gamma;
 		} catch (ArithmeticException e) {
-			// System.out.println("here3");
+			System.out.println("here3");
 			beta = Double.NaN;
 		}
 	}
 
 	/** Estimates M. */
 	private void estimateM() {
-		if (Double.isNaN(beta) || beta == 0)
+		if (Double.isNaN(beta) || beta == 0) {
+			// System.out.println("here4");
 			M = Double.NaN;
-		else {
+		} else {
 			// System.out.println("M calculation: " + C[0] + " " + beta);
 			M = Math.round(C[0] / beta);
 		}
-	}
-
-	/**
-	 * Inverts the parameters of the length process, estimating gamma, beta, and M.
-	 */
-	private void invert() {
-		calcC();
-		estimateGamma();
-		estimateBeta();
-		estimateM();
 	}
 
 	public double getGamma() {
