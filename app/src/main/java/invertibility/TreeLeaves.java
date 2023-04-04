@@ -5,16 +5,14 @@ package invertibility;
 import java.util.List;
 
 /**
- * Class that contains information about the lengths of the sequences at the
+ * Class that contains information about the sequences at the
  * leaves of a tree.
  */
 public class TreeLeaves {
-	private List<Integer> seqLeavesLengths;
+	private List<String> seqLeaves;
 
-	// Prereq: at least one leaf length must be given.
-	public TreeLeaves(List<Integer> seqLeavesLengths) {
-		// assertEquals(seqLeavesLengths.size() > 0, true);
-		this.seqLeavesLengths = seqLeavesLengths;
+	public TreeLeaves(List<String> seqLeaves) {
+		this.seqLeaves = seqLeaves;
 	}
 
 	public List<Integer> getSeqLeavesLengths() {

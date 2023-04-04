@@ -227,7 +227,8 @@ public class TreeSimul {
 	 * Transforms a TreeSimul object into a TreeLeaves object.
 	 */
 	public TreeLeaves toTreeLeaves() {
-		return new TreeLeaves(seqLeaves.stream().map(leaf -> leaf.getSequence().length()).collect(Collectors.toList()));
+		return new TreeLeaves(seqLeaves);
+		
 	}
 
 	public double getLambda() {

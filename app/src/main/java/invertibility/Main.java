@@ -31,39 +31,6 @@ public class Main {
 	}
 
 	/**
-	 * Returns a bootstrapped version of the given data.
-	 * 
-	 * @param numSamples is the number of bootstrap samples to create.
-	 * @param data       is the data the boostrap samples are created from.
-	 * @return the bootstrapped data as a 2D list.
-	 */
-
-	public static List<List<Integer>> bootStrap(int numSamples, List<Integer> data) {
-		List<List<Integer>> bootStrapped = new LinkedList<List<Integer>>();
-		int size = data.size();
-
-		int[] dataArray = new int[size];
-		Iterator<Integer> iter = data.iterator();
-		for (int i = 0; i < size; i++) {
-			dataArray[i] = iter.next();
-		}
-
-		Random r = new Random();
-
-		for (int i = 0; i < numSamples; i++) {
-			List<Integer> list = new LinkedList<Integer>();
-
-			for (int j = 0; j < size; j++) {
-				list.add(dataArray[r.nextInt(0, size)]);
-			}
-
-			bootStrapped.add(list);
-		}
-
-		return bootStrapped;
-	}
-
-	/**
 	 * Example to show how to run trials on a variable number of leaves, using the
 	 * length process simulator TreeSimul.
 	 */
@@ -127,7 +94,6 @@ public class Main {
 			}
 
 			N[trial] = (int) Math.round(Math.log10(num));
-			// N[trial] = num / 1000;
 			final int NUM_SAMPLES = 50;
 
 			double[] gSample = new double[NUM_SAMPLES];
@@ -138,26 +104,6 @@ public class Main {
 			for (int sample = 0; sample < NUM_SAMPLES; sample++) {
 				TreeSimul example = new TreeSimul(lambda, mu, nu, pi0, rootVertex, root, edges, t);
 				TreeLeaves exampleTree = example.toTreeLeaves();
-				// List<Integer> seqLeavesLengths = exampleTree.getSeqLeavesLengths();
-
-				// List<List<Integer>> bootStrapped = bootStrap(numSamples, seqLeavesLengths);
-
-				// Iterator<List<Integer>> iter = bootStrapped.iterator();
-				// Iterator<Integer> iter = seqLeavesLengths.iterator();
-				// int[] dataArray = new int[seqLeavesLengths.size()];
-
-				// for (int i = 0; i < seqLeavesLengths.size(); i++) {
-				// dataArray[i] = iter.next();
-				// }
-
-				// Random r = new Random();
-
-				// for (int sample = 0; sample < NUM_SAMPLES; sample++) {
-				// List<Integer> list = new LinkedList<Integer>();
-
-				// for (int j = 0; j < seqLeavesLengths.size(); j++) {
-				// list.add(dataArray[r.nextInt(0, seqLeavesLengths.size())]);
-				// }
 
 				Invert exampleInverted = new Invert(exampleTree);
 
@@ -165,9 +111,6 @@ public class Main {
 				bSample[sample] = exampleInverted.getBeta();
 				mSample[sample] = exampleInverted.getM();
 
-				// if (Double.isNaN(mSample[sample])) {
-				// System.out.println("lol");
-				// }
 				CsSample[sample] = exampleInverted.getCs();
 			}
 
@@ -183,21 +126,14 @@ public class Main {
 			g[trial] = average(gTrimmed);
 			gUpper[trial] = g[trial] + standardDeviation(g[trial], gTrimmed);
 			gLower[trial] = g[trial] - standardDeviation(g[trial], gTrimmed);
-			// gUpper[trial] = gTrimmed[gTrimmed.length - 1];
-			// gLower[trial] = gTrimmed[0];
 
 			b[trial] = average(bTrimmed);
 			bUpper[trial] = b[trial] + standardDeviation(b[trial], bTrimmed);
 			bLower[trial] = b[trial] - standardDeviation(b[trial], bTrimmed);
-			// bUpper[trial] = bTrimmed[bTrimmed.length - 1];
-			// bLower[trial] = bTrimmed[0];
 
-			// System.out.println("M b4 trimming: " + average(mBootStrap));
 			m[trial] = average(mTrimmed);
 			mUpper[trial] = m[trial] + standardDeviation(m[trial], mTrimmed);
 			mLower[trial] = m[trial] - standardDeviation(m[trial], mTrimmed);
-			// mUpper[trial] = mTrimmed[mTrimmed.length - 1];
-			// mLower[trial] = mTrimmed[0];
 
 			Cs[0][trial] = average(CTrimmed1);
 			CsUpper[0][trial] = Cs[0][trial] + standardDeviation(Cs[0][trial], CTrimmed1);
@@ -220,9 +156,7 @@ public class Main {
 			System.out.println("C3: " + Cs[2][trial] + " " + CsUpper[2][trial]);
 		}
 
-		// for (int num = stepSize, trial = 0; num <= maxN; num+= stepSize, trial++) {
-		// System.out.println("trial " + trial + ": " + g[trial]);
-		// }
+
 		String xAxis = "log N";
 		// display charts
 		System.out.println("gamma: " + gamma + " beta: " + beta + " M: " + M);
@@ -255,13 +189,7 @@ public class Main {
 		if (Double.isNaN(data[index]))
 			return new double[] {};
 
-		int startIndex = index / 10;
-		int endIndex = index - startIndex + 1;
-		// System.out.println("Index: " + index);
-		startIndex = 0;
-		endIndex = index + 1;
-
-		return Arrays.copyOfRange(data, startIndex, endIndex);
+		return Arrays.copyOfRange(data, 0, index + 1);
 	}
 
 	private static double average(double[] data) {
@@ -295,6 +223,5 @@ public class Main {
 	public static void main(String[] args) {
 		// example1();
 		example2();
-
 	}
 }

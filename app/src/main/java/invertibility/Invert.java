@@ -10,20 +10,33 @@ import java.util.List;
 public class Invert {
 	final static int DIVISION_PRECISION = 8; // number of decimal digits in divisions
 	private TreeLeaves tree;
-	private double[] partial;
-	private double[] C;
-	private double C2prime;
-	private double C3prime;
+
+	private double mu;
+	private double lambda;
 	private double gamma;
 	private double beta;
 	private double M;
+	private double nu;
+	private double a;
+	private double pi0;
 
+	private double[] partial;
+	private double[] C;
+
+	private double C2prime;
+	private double C3prime;
+	private double[] D;
+
+	/**
+	 * Inverts the process based on given data on the lengths of the sequences at
+	 * the leaves to estimate gamma, beta, and M.
+	 */
 	public Invert(TreeLeaves tree) {
 		this.tree = tree;
 		partial = new double[3];
 		C = new double[3];
 
-		calcPartials();
+		calcPartials("length");
 		updateCs();
 
 		estimateGamma();
@@ -33,60 +46,58 @@ public class Invert {
 
 	/**
 	 * Inverts the process based on given data on the lengths of the sequences at
-	 * the leaves.
+	 * the leaves, as well as on mu, lambda, and M, to estimate a, nu, and pi0.
 	 */
-	public Invert(List<Integer> seqLeavesLengths) {
+	public Invert(double mu, double lambda, double M, TreeLeaves tree) {
+		this.tree = tree;
 		partial = new double[3];
 		C = new double[3];
+		D = new double[3];
 
-		calcPartials(seqLeavesLengths);
+		this.mu = mu;
+		this.lambda = lambda;
+		this.M = M;
+
+		calcPartials("1-mer");
 		updateCs();
 
-		estimateGamma();
-		estimateBeta();
-		estimateM();
+		updateDs();
 	}
 
-	private void calcPartials() {
-		List<Integer> seqLeavesLengths = tree.getSeqLeavesLengths();
+	private void calcPartials(String type) {
+		List<Integer> seqLeavesLengths = null;
+
+		switch(type) {
+			case "length": seqLeavesLengths = tree.getSeqLeavesLengths();
+			break;
+			case "1-mer": seqLeavesLengths = tree.get
+		}
+		 
 		calcPartials(seqLeavesLengths);
 	}
 
 	private void calcPartials(List<Integer> seqLeavesLengths) {
-
 		Iterator<Integer> leafIter = seqLeavesLengths.iterator();
 
 		// estimate partials of G(z, t) with respect to z and evaluated at z = 1 and
 		// time t,
 		// by using the expected value of the kth factorial moment of the length process
 
-		long[] curSum = new long[3];
-		int t = 1;
+		int num = 1;
 		while (leafIter.hasNext()) {
 			long length = (long) leafIter.next();
 			long[] lengths = new long[] { length, length * (length - 1), length * (length - 1) * (length - 2) };
 
 			for (int i = 0; i < 3; i++) {
 				try {
-					// curSum[i] = Math.addExact(curSum[i], lengths[i]);
-					partial[i] += (lengths[i] - partial[i]) / t;
-					if (i == 2)
-						t++;
+					partial[i] += (lengths[i] - partial[i]) / num;
 				} catch (ArithmeticException e) {
 					System.out.println("PARTIALS");
-					// partial[i] += curSum[i] / (double) seqLeavesLengths.size();
-					// curSum[i] = lengths[i];
 				}
 			}
-		}
 
-		// System.out.println("partial: " + partial[0]);
-		// System.out.println("size: " + seqLeavesLengths.size());
-		// System.out.println("PARTIALS");
-		// for (int i = 0; i < 3; i++) {
-		// 	// partial[i] += curSum[i] / (double) seqLeavesLengths.size();
-		// 	System.out.println(i + " " + partial[i]);
-		// }
+			num++;
+		}
 	}
 
 	/* Prereq: partials are calculated */
@@ -103,6 +114,11 @@ public class Invert {
 			C3prime = C[2] / C[0];
 
 		}
+	}
+
+	/* Prereq: Cs are calculated */
+	private void updateDs() {
+		D[0] = C[0] * Math.exp(mu);
 	}
 
 	/** Estimates gamma. */

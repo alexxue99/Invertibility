@@ -18,13 +18,13 @@ import org.jfree.data.xy.XYIntervalDataItem;
 import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
 
-/** Class used to chart estimated data vs. actual values. */
+/** Class used to chart estimated data vs. exact values. */
 public class Chart {
 
 	static class Chart_AWT extends ApplicationFrame {
 
 	//	// box and whisker chart
-	// 	public Chart_AWT(String applicationTitle, String chartTitle, String var, double[][] estimated, double actual,
+	// 	public Chart_AWT(String applicationTitle, String chartTitle, String var, double[][] estimated, double exact,
 	// 			int[] N) {
 	// 		super(applicationTitle);
 
@@ -48,7 +48,7 @@ public class Chart {
 
 		// error bar chart
 		public Chart_AWT(String xAxis, String applicationTitle, String chartTitle, String var, double[] estimated,
-				double[] estimatedUpper, double[] estimatedLower, double actual,
+				double[] estimatedUpper, double[] estimatedLower, double exact,
 				int[] N) {
 			super(applicationTitle);
 
@@ -69,8 +69,8 @@ public class Chart {
 
 			valuesDataSet.addSeries(values);
 
-			XYIntervalSeries<String> actualValue = new XYIntervalSeries<String>("actual");
-			valuesDataSet.addSeries(actualValue);
+			XYIntervalSeries<String> exactValue = new XYIntervalSeries<String>("exact");
+			valuesDataSet.addSeries(exactValue);
 
 			JFreeChart chart = ChartFactory.createScatterPlot(chartTitle, xAxis, var, valuesDataSet,
 					PlotOrientation.VERTICAL,
@@ -80,7 +80,7 @@ public class Chart {
 			XYErrorRenderer errorRenderer = new XYErrorRenderer();
 			plot.setRenderer(errorRenderer);
 
-			ValueMarker marker = new ValueMarker(actual);
+			ValueMarker marker = new ValueMarker(exact);
 			marker.setPaint(Color.BLUE);
 			plot.addRangeMarker(marker);
 			errorRenderer.setSeriesPaint(0, Color.RED);
@@ -100,16 +100,16 @@ public class Chart {
 
 	public static void ErrorChart(String xAxis, String var, double[] estimated, double[] estimatedUpper,
 			double[] estimatedLower,
-			double actual, int[] N) {
-		Chart_AWT chart = new Chart_AWT(xAxis, var + " vs. " + xAxis, "", var, estimated, estimatedUpper, estimatedLower, actual,
+			double exact, int[] N) {
+		Chart_AWT chart = new Chart_AWT(xAxis, var + " vs. " + xAxis, "", var, estimated, estimatedUpper, estimatedLower, exact,
 				N);
 		chart.pack();
 		chart.setVisible(true);
 	}
 
 	// public static void BoxAndWhiskerChart(String chartTitle, String var, double[][] estimated,
-	// 		double actual, int[] N) {
-	// 	Chart_AWT chart = new Chart_AWT(chartTitle, chartTitle, var, estimated, actual,
+	// 		double exact, int[] N) {
+	// 	Chart_AWT chart = new Chart_AWT(chartTitle, chartTitle, var, estimated, exact,
 	// 			N);
 	// 	chart.pack();
 	// 	chart.setVisible(true);
