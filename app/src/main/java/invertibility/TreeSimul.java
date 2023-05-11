@@ -16,6 +16,8 @@ public class TreeSimul {
 
 	private String[] seqLeaves; // contains information about the sequences at the leaves
 
+	private Random rand;
+
 	/**
 	 * Constructor to initialize tree.
 	 * 
@@ -49,6 +51,8 @@ public class TreeSimul {
 		this.N = N;
 
 		seqLeaves = new String[N];
+		
+		rand = new Random();
 
 		runLengthProcess();
 	}
@@ -61,7 +65,6 @@ public class TreeSimul {
 
 	/** Returns a 0 with probability pi0 and a 1 with probability 1 - pi0. */
 	private char getChar() {
-		Random rand = new Random();
 		return (rand.nextDouble() <= pi0) ? '0' : '1';
 	}
 

@@ -12,8 +12,8 @@ public class Main {
 		double time = 1;
 		String root = "01010101";
 
-		 // int[] Ns = { 1000, 10000, 100000, 1000000 };
-		 int[] Ns = { 1000, 10000, 100000 };
+		// int[] Ns = { 1000, 10000, 100000, 1000000 };
+		int[] Ns = { 1000, 10000, 100000 };
 		int numIter = Ns.length;
 
 		// initialize arrays
@@ -88,104 +88,84 @@ public class Main {
 
 	public static void starTree1Mer() {
 		// set length process parameters
-		double lambda = 1;
-		double mu = 0.7;
-		double nu = 0.4;
-		double pi0 = 0.3;
-		String root = "01010101";
-		int M = root.length();
+		final double LAMBDA = 1;
+		final double MU = 0.7;
+		final double NU = 0.6;
+		final double PI0 = 0.3;
+		final String ROOT = "01010101";
+		final int M = ROOT.length();
 
-		int a = 0;
-		for (char c: root.toCharArray()) {
+		int temp = 0;
+		for (char c : ROOT.toCharArray()) {
 			if (c == '1')
-				a++;
+				temp++;
 		}
+		final int A = temp;
 
-		int[] Ns = { 1000, 10000, 100000, 200000, 300000 };
-		int numIter = Ns.length;
+		int[] N = { 1000, 10000, 100000 };
+		int numIter = N.length;
 
 		// initialize arrays
 		// logN is the number of leaves for each trial
 		int[] logN = new int[numIter];
 
-		double[] n = new double[numIter];
-		double[] pi0Upper = new double[numIter];
-		double[] pi0Lower = new double[numIter];
-		double[] aUpper = new double[numIter];
-		double[] aLower = new double[numIter];
+		double[] nu = new double[numIter];
+		double[] pi0 = new double[numIter];
+		double[] a = new double[numIter];
 
-		double[] nDeviation = new double[numIter];
-		double[] pi0UpperDeviation = new double[numIter];
-		double[] pi0LowerDeviation = new double[numIter];
-		double[] aUpperDeviation = new double[numIter];
-		double[] aLowerDeviation = new double[numIter];
+		double[] nuDeviation = new double[numIter];
+		double[] pi0Deviation = new double[numIter];
+		double[] aDeviation = new double[numIter];
 
 		// run trials
 		for (int trial = 0; trial < numIter; trial++) {
-			int num = Ns[trial];
+			int num = N[trial];
 			System.out.println("Current trial: " + trial);
 
 			logN[trial] = (int) Math.round(Math.log10(num));
 			final int NUM_SAMPLES = 50;
 
-			double[] nSample = new double[NUM_SAMPLES];
-			double[] pi0UpperSample = new double[NUM_SAMPLES];
-			double[] pi0LowerSample = new double[NUM_SAMPLES];
-			double[] aUpperSample = new double[NUM_SAMPLES];
-			double[] aLowerSample = new double[NUM_SAMPLES];
+			double[] nuSample = new double[NUM_SAMPLES];
+			double[] pi0Sample = new double[NUM_SAMPLES];
+			double[] aSample = new double[NUM_SAMPLES];
 
 			for (int sample = 0; sample < NUM_SAMPLES; sample++) {
-				TreeSimul example = new TreeSimul(lambda, mu, nu, pi0, root, Ns[trial]);
+				TreeSimul example = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, N[trial]);
 				TreeLeaves exampleTree = example.toTreeLeaves();
 
-				Invert exampleInverted = new Invert(mu, lambda, M, exampleTree);
+				Invert exampleInverted = new Invert(MU, LAMBDA, M, exampleTree);
 
-				nSample[sample] = exampleInverted.getNu();
-				pi0UpperSample[sample] = exampleInverted.getPi0Upper();
-				pi0LowerSample[sample] = exampleInverted.getPi0Lower();
-				aUpperSample[sample] = exampleInverted.getAUpper();
-				aLowerSample[sample] = exampleInverted.getALower();
+				nuSample[sample] = exampleInverted.getNu();
+				pi0Sample[sample] = exampleInverted.getPi0();
+				aSample[sample] = exampleInverted.getA();
 			}
 
 			System.out.println("TRIMMING");
-			nSample = trim(nSample);
-			pi0UpperSample = trim(pi0UpperSample);
-			pi0LowerSample = trim(pi0LowerSample);
-			aUpperSample = trim(aUpperSample);
-			aLowerSample = trim(aLowerSample);
+			nuSample = trim(nuSample);
+			pi0Sample = trim(pi0Sample);
+			aSample = trim(aSample);
 
-			n[trial] = average(nSample);
-			nDeviation[trial] = standardDeviation(n[trial], nSample);
-			
-			pi0Upper[trial] = average(pi0UpperSample);
-			pi0UpperDeviation[trial]  = standardDeviation(pi0Upper[trial], pi0UpperSample);
+			nu[trial] = average(nuSample);
+			nuDeviation[trial] = standardDeviation(nu[trial], nuSample);
 
-			pi0Lower[trial] = average(pi0LowerSample);
-			pi0LowerDeviation[trial] = standardDeviation(pi0Lower[trial], pi0LowerSample);
+			pi0[trial] = average(pi0Sample);
+			pi0Deviation[trial] = standardDeviation(pi0[trial], pi0Sample);
 
-			aUpper[trial] = average(aUpperSample);
-			aUpperDeviation[trial]  = standardDeviation(aUpper[trial], aUpperSample);
-
-			aLower[trial] = average(aLowerSample);
-			aLowerDeviation[trial] = standardDeviation(aLower[trial], aLowerSample);
+			a[trial] = average(aSample);
+			aDeviation[trial] = standardDeviation(a[trial], aSample);
 
 			System.out.println("Trial: " + trial);
-			System.out.println("nu: " + n[trial] + " " + nDeviation[trial]);
-			System.out.println("pi0Upper: " + pi0Upper[trial] + " " + pi0UpperDeviation[trial]);
-			System.out.println("pi0Lower: " + pi0Lower[trial] + " " + pi0LowerDeviation[trial]);
-			System.out.println("aUpper: " + aUpper[trial] + " " + aUpperDeviation[trial]);
-			System.out.println("aLower: " + aLower[trial] + " " + aLowerDeviation[trial]);
+			System.out.println("nu: " + nu[trial] + " " + nuDeviation[trial]);
+			System.out.println("pi0: " + pi0[trial] + " " + pi0Deviation[trial]);
+			System.out.println("a: " + a[trial] + " " + aDeviation[trial]);
 		}
 
-		double exp = Math.exp(-nu);
 		String xAxis = "log N";
 		// display charts
-		System.out.println("exp: " + exp + " pi0: " + pi0 + " a: " + a);
-		Chart.ErrorChart(xAxis, "exp", n, nDeviation, exp, logN);
-		Chart.ErrorChart(xAxis, "pi0Upper", pi0Upper, pi0UpperDeviation, pi0, logN);
-		Chart.ErrorChart(xAxis, "pi0Lower", pi0Lower, pi0LowerDeviation, pi0, logN);
-		Chart.ErrorChart(xAxis, "aUpper", aUpper, aUpperDeviation, a, logN);
-		Chart.ErrorChart(xAxis, "aLower", aLower, aLowerDeviation, a, logN);
+		System.out.println("nu: " + NU + " pi0: " + PI0 + " a: " + A);
+		Chart.ErrorChart(xAxis, "nu", nu, nuDeviation, NU, logN);
+		Chart.ErrorChart(xAxis, "pi0", pi0, pi0Deviation, PI0, logN);
+		Chart.ErrorChart(xAxis, "a", a, aDeviation, A, logN);
 	}
 
 	private static double[] trim(double[] data) {
@@ -199,7 +179,7 @@ public class Main {
 			return new double[] {};
 
 		System.out.println(index);
-		
+
 		return Arrays.copyOfRange(data, 0, index + 1);
 	}
 
@@ -232,6 +212,6 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		starTreeLength();
+		starTree1Mer();
 	}
 }
