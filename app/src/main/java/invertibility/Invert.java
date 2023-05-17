@@ -22,7 +22,7 @@ public class Invert {
 	private double a;
 	private double pi0;
 
-	private double[] partial;
+	private double[] partials;
 	private double[] C;
 
 	private double C2prime;
@@ -36,7 +36,7 @@ public class Invert {
 	public Invert(TreeLeaves tree) {
 		this.tree = tree;
 		N = tree.getN();
-		partial = new double[3];
+		partials = new double[3];
 		C = new double[3];
 
 		calcPartials("length");
@@ -54,7 +54,7 @@ public class Invert {
 	public Invert(double mu, double lambda, double M, TreeLeaves tree) {
 		this.tree = tree;
 		N = tree.getN();
-		partial = new double[3];
+		partials = new double[3];
 		C = new double[3];
 		D = new double[3];
 
@@ -62,78 +62,83 @@ public class Invert {
 		this.lambda = lambda;
 		this.M = M;
 
-		calcPartials("ones");
+		calcPartials("1-mer");
 		updateCs();
-
-		for (int i = 0; i < 3; i++)
-			D[i] = C[i];
-
-		partial = new double[3];
-		calcPartials("zeros");
-		updateCs();
-
-		double P = 0.3;
-		for (int i = 0; i < 3; i++) {
-			C[i] = C[i] * (P - 1) + D[i] * P;
-		}
-
 		updateDs();
+
 		estimateNu();
 		estimatePi0();
 		estimateA();
 	}
 
 	private void calcPartials(String type) {
-		int[] array = null;
-
 		switch (type) {
 			case "length":
-				array = tree.getSeqLeavesLengths();
+				partials = calcPartials(tree.getSeqLeavesLengths());
 				break;
-			case "ones":
-				array = tree.getSeqNumOnes();
-				// d ln G / dz1 * pi0 - d ln G / dz2 * pi1
-				break;
-			case "zeros":
-				array = tree.getSeqNumZeros();
+			case "1-mer":
+				int[] ones = tree.getSeqNumOnes();
+				int[] zeros = tree.getSeqNumZeros();
+				partials = calcPartials(ones, zeros, 0.1);
 				break;
 		}
-
-		calcPartials(array);
 	}
 
-	private void calcPartials(int[] seqLeavesLengths) {
+	private double[] calcPartials(int[] array) {
 		// estimate partials of G(z, t) with respect to z and evaluated at z = 1 and
 		// time t,
 		// by using the expected value of the kth factorial moment of the length process
-
+		double[] partials = new double[3];
 		for (int i = 0; i < N;) {
-			long length = seqLeavesLengths[i];
+			long length = array[i];
 			long[] lengths = new long[] { length, length * (length - 1), length * (length - 1) * (length - 2) };
 
 			i++;
 			for (int j = 0; j < 3; j++) {
 				try {
-					partial[j] += (lengths[j] - partial[j]) / i;
+					partials[j] += (lengths[j] - partials[j]) / i;
 				} catch (ArithmeticException e) {
 					System.out.println("PARTIALS");
 				}
 			}
 		}
 
-	//	for (int i = 0; i < 3; i++)
-	//		System.out.println(i + " " + partial[i]);
+		return partials;
+	}
+
+	private double[] calcPartials(int[] ones, int[] zeros, double PI0) {
+		double[] partials_1 = calcPartials(ones);
+		double[] partials_2 = calcPartials(zeros);
+		
+		double partial_12 = 0;
+		double partial_112 = 0;
+		double partial_122 = 0;
+
+		for (int i = 0; i < N; i++) {
+			partial_12 += (ones[i] * zeros[i] - partial_12) / (i + 1);
+			partial_112 += (ones[i] * (ones[i] - 1) * zeros[i] - partial_112) / (i + 1);
+			partial_122 += (ones[i] * zeros[i] * (zeros[i] - 1) - partial_122) / (i + 1);
+		}
+
+		double[] partials = new double[3];
+		double PI1 = 1 - PI0;
+
+		partials[0] = partials_1[0] * PI0 - partials_2[0] * PI1;
+		partials[1] = partials_1[1] * PI0 * PI0 + partials_2[1] * PI1 * PI1 - 2 * partial_12 * PI0 * PI1;
+		partials[2] = partials_1[2] * Math.pow(PI0, 3) - partials_2[2] * Math.pow(PI1, 3)
+				- 3 * partial_112 * PI0 * PI0 * PI1 + 3 * partial_122 * PI0 * PI1 * PI1;
+
+		return partials;
 	}
 
 	/* Prereq: partials are calculated */
 	private void updateCs() {
-		C[0] = partial[0];
-		C[1] = partial[1] - partial[0] * partial[0];
-		C[2] = partial[2] + 2 * Math.pow(partial[0], 3) - 3 * partial[0] * partial[1];
+		C[0] = partials[0];
+		C[1] = partials[1] - partials[0] * partials[0];
+		C[2] = partials[2] + 2 * Math.pow(partials[0], 3) - 3 * partials[0] * partials[1];
 		if (C[0] == 0) {
 			C2prime = Double.NaN;
 			C3prime = Double.NaN;
-			System.out.println("here");
 		} else {
 			C2prime = C[1] / C[0];
 			C3prime = C[2] / C[0];
@@ -145,6 +150,7 @@ public class Invert {
 		D[0] = C[0] * Math.exp(mu);
 		D[1] = -C[1] * Math.exp(2 * mu);
 		D[2] = C[2] * Math.exp(3 * mu) / 2;
+		System.out.println(D[0] + "\t" + D[1] + "\t" + D[2]);
 	}
 
 	/** Estimates gamma. */
@@ -187,7 +193,7 @@ public class Invert {
 	private void estimateNu() {
 		discriminant = -3 * D[0] * D[0] * D[1] * D[1] + 4 * Math.pow(D[0], 3) * D[2] + 4 * M * D[1] * D[1]
 				- 6 * M * D[0] * D[1] * D[2] + M * M * D[2] * D[2];
-		exp = Math.sqrt(discriminant);
+		exp = Math.sqrt(-discriminant);
 		exp /= (D[0] * D[0] - M * D[1]);
 
 		if (exp < 0) {
@@ -195,8 +201,8 @@ public class Invert {
 			flip = true;
 		}
 
-		System.out.println((D[0]*D[1]-M*D[2])/(D[0] * D[0] - M * D[1]));
-
+		// System.out.println((D[0] * D[1] - M * D[2]) / (D[0] * D[0] - M * D[1]));
+		System.out.println("EXP: " + exp + "\t" + discriminant);
 		nu = -Math.log(exp);
 	}
 

@@ -5,84 +5,83 @@ import java.util.Arrays;
 public class Main {
 	public static void starTreeLength() {
 		// set length process parameters
-		double lambda = 1;
-		double mu = 0.7;
-		double nu = 3;
-		double pi0 = 0.3;
-		double time = 1;
-		String root = "01010101";
+		final double LAMBDA = 1;
+		final double MU = 0.7;
+		final double NU = 3;
+		final double PI0 = 0.5;
+		final String ROOT = "01010101";
+
+		// set the actual values for M, gamma, beta
+		final int M = ROOT.length();
+		final double GAMMA = LAMBDA / MU;
+		final double BETA = Math.exp(LAMBDA - MU);
 
 		// int[] Ns = { 1000, 10000, 100000, 1000000 };
-		int[] Ns = { 1000, 10000, 100000 };
-		int numIter = Ns.length;
+		int[] N = { 1000, 10000, 100000 };
+		int numIter = N.length;
 
 		// initialize arrays
 		// logN is the number of leaves for each trial
-		// g is the estimated gamma for each trial
-		// b is the estimated beta for each trial
+		// gamma is the estimated gamma for each trial
+		// beta is the estimated beta for each trial
 		// m is the estimated m for each trial
 		int[] logN = new int[numIter];
 
-		double[] g = new double[numIter];
-		double[] b = new double[numIter];
+		double[] gamma = new double[numIter];
+		double[] beta = new double[numIter];
 		double[] m = new double[numIter];
 
-		double[] gDeviation = new double[numIter];
-		double[] bDeviation = new double[numIter];
+		double[] gammaDeviation = new double[numIter];
+		double[] betaDeviation = new double[numIter];
 		double[] mDeviation = new double[numIter];
-
-		// set the actual values for M, gamma, beta
-		int M = root.length();
-		double gamma = lambda / mu;
-		double beta = Math.exp((lambda - mu) * time);
 
 		// run trials
 		for (int trial = 0; trial < numIter; trial++) {
-			int num = Ns[trial];
+			int num = N[trial];
 			System.out.println("Current trial: " + trial);
 
 			logN[trial] = (int) Math.round(Math.log10(num));
 			final int NUM_SAMPLES = 50;
 
-			double[] gSample = new double[NUM_SAMPLES];
-			double[] bSample = new double[NUM_SAMPLES];
+			double[] gammaSample = new double[NUM_SAMPLES];
+			double[] betaSample = new double[NUM_SAMPLES];
 			double[] mSample = new double[NUM_SAMPLES];
 
 			for (int sample = 0; sample < NUM_SAMPLES; sample++) {
-				TreeSimul example = new TreeSimul(lambda, mu, nu, pi0, root, Ns[trial]);
+				TreeSimul example = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, N[trial]);
 				TreeLeaves exampleTree = example.toTreeLeaves();
 
 				Invert exampleInverted = new Invert(exampleTree);
 
-				gSample[sample] = exampleInverted.getGamma();
-				bSample[sample] = exampleInverted.getBeta();
+				gammaSample[sample] = exampleInverted.getGamma();
+				betaSample[sample] = exampleInverted.getBeta();
 				mSample[sample] = exampleInverted.getM();
 			}
 
-			gSample = trim(gSample);
-			bSample = trim(bSample);
+			gammaSample = trim(gammaSample);
+			betaSample = trim(betaSample);
 			mSample = trim(mSample);
 
-			g[trial] = average(gSample);
-			gDeviation[trial] = standardDeviation(g[trial], gSample);
+			gamma[trial] = average(gammaSample);
+			gammaDeviation[trial] = standardDeviation(gamma[trial], gammaSample);
 
-			b[trial] = average(bSample);
-			bDeviation[trial] = standardDeviation(b[trial], bSample);
+			beta[trial] = average(betaSample);
+			betaDeviation[trial] = standardDeviation(beta[trial], betaSample);
 
 			m[trial] = average(mSample);
 			mDeviation[trial] = standardDeviation(m[trial], mSample);
 
 			System.out.println("Trial: " + trial);
-			System.out.println("gamma: " + g[trial] + " " + gDeviation[trial]);
-			System.out.println("beta: " + b[trial] + " " + bDeviation[trial]);
+			System.out.println("gamma: " + gamma[trial] + " " + gammaDeviation[trial]);
+			System.out.println("beta: " + beta[trial] + " " + betaDeviation[trial]);
 			System.out.println("M: " + m[trial] + " " + mDeviation[trial]);
 		}
 
 		String xAxis = "log N";
 		// display charts
 		System.out.println("gamma: " + gamma + " beta: " + beta + " M: " + M);
-		Chart.ErrorChart(xAxis, "gamma", g, gDeviation, gamma, logN);
-		Chart.ErrorChart(xAxis, "beta", b, bDeviation, beta, logN);
+		Chart.ErrorChart(xAxis, "gamma", gamma, gammaDeviation, GAMMA, logN);
+		Chart.ErrorChart(xAxis, "beta", beta, betaDeviation, BETA, logN);
 		Chart.ErrorChart(xAxis, "M", m, mDeviation, M, logN);
 	}
 
@@ -90,8 +89,8 @@ public class Main {
 		// set length process parameters
 		final double LAMBDA = 1;
 		final double MU = 0.7;
-		final double NU = 0.6;
-		final double PI0 = 0.3;
+		final double NU = 0.2;
+		final double PI0 = 0.1;
 		final String ROOT = "01010101";
 		final int M = ROOT.length();
 
