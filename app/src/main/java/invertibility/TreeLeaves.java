@@ -33,6 +33,10 @@ public class TreeLeaves {
 		return Arrays.stream(seqLeaves).mapToInt(s -> s.length() - numOnes(s)).toArray();
 	}
 
+	public String[] getSeq() {
+		return seqLeaves;
+	}
+
 	public int getN() {
 		return seqLeaves.length;
 	}

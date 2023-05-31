@@ -22,6 +22,14 @@ public abstract class Invert {
 	protected double[] partials;
 	protected double[] C;
 
+	public Invert(TreeLeaves tree) {
+		this.tree = tree;
+		N = tree.getN();
+
+		partials = new double[3];
+		C = new double[3];
+	}
+
 	abstract protected void calcPartials();
 
 	protected double[] factorialMoments(int[] array) {
@@ -48,7 +56,8 @@ public abstract class Invert {
 
 	/* Prereq: partials are calculated */
 	protected void updateCs() {
-		// System.out.println("PARTIALS: " + partials[0] + " " + partials[1] + " " + partials[2]);
+		// System.out.println("PARTIALS: " + partials[0] + " " + partials[1] + " " +
+		// partials[2]);
 		C[0] = partials[0];
 		C[1] = partials[1] - partials[0] * partials[0];
 		C[2] = partials[2] + 2 * Math.pow(partials[0], 3) - 3 * partials[0] * partials[1];

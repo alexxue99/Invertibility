@@ -20,10 +20,10 @@ dependencies {
     // Use JUnit test framework.
     // testImplementation 'junit:junit:4.13'
 
-    // This dependency is used by the application.
-    implementation 'com.google.guava:guava:29.0-jre'
+    // These dependencies are used by the application.
 
     implementation fileTree(dir: 'deps', include: 'jfreechart-2.0.0.jar')
+    implementation fileTree(dir: 'deps/ejml-v0.42-libs')
 }
 
 
