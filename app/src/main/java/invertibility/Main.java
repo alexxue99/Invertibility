@@ -51,7 +51,7 @@ public class Main {
 				TreeSimul example = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, N[trial]);
 				TreeLeaves exampleTree = example.toTreeLeaves();
 
-				Invert exampleInverted = new Invert(exampleTree);
+				InvertLength exampleInverted = new InvertLength(exampleTree);
 
 				gammaSample[sample] = exampleInverted.getGamma();
 				betaSample[sample] = exampleInverted.getBeta();
@@ -79,7 +79,7 @@ public class Main {
 
 		String xAxis = "log N";
 		// display charts
-		System.out.println("gamma: " + gamma + " beta: " + beta + " M: " + M);
+		System.out.println("gamma: " + GAMMA + " beta: " + BETA + " M: " + M);
 		Chart.ErrorChart(xAxis, "gamma", gamma, gammaDeviation, GAMMA, logN);
 		Chart.ErrorChart(xAxis, "beta", beta, betaDeviation, BETA, logN);
 		Chart.ErrorChart(xAxis, "M", m, mDeviation, M, logN);
@@ -90,7 +90,7 @@ public class Main {
 		final double LAMBDA = 1;
 		final double MU = 0.7;
 		final double NU = 0.2;
-		final double PI0 = 0.1;
+		final double PI0 = 0.3;
 		final String ROOT = "01010101";
 		final int M = ROOT.length();
 
@@ -132,7 +132,7 @@ public class Main {
 				TreeSimul example = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, N[trial]);
 				TreeLeaves exampleTree = example.toTreeLeaves();
 
-				Invert exampleInverted = new Invert(MU, LAMBDA, M, exampleTree);
+				Invert1Mer exampleInverted = new Invert1Mer(MU, LAMBDA, M, exampleTree);
 
 				nuSample[sample] = exampleInverted.getNu();
 				pi0Sample[sample] = exampleInverted.getPi0();
