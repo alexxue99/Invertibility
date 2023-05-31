@@ -48,14 +48,19 @@ public class Main {
 			double[] mSample = new double[NUM_SAMPLES];
 
 			for (int sample = 0; sample < NUM_SAMPLES; sample++) {
-				TreeSimul example = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, N[trial]);
-				TreeLeaves exampleTree = example.toTreeLeaves();
+				TreeSimul sampleTree = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, N[trial]);
+				TreeLeaves sampleLeaves = sampleTree.toTreeLeaves();
 
-				InvertLength exampleInverted = new InvertLength(exampleTree);
+				InvertLength inverted = new InvertLength(sampleLeaves);
 
-				gammaSample[sample] = exampleInverted.getGamma();
-				betaSample[sample] = exampleInverted.getBeta();
-				mSample[sample] = exampleInverted.getM();
+				gammaSample[sample] = inverted.getGamma();
+				betaSample[sample] = inverted.getBeta();
+
+				Integer sampleM = inverted.getM();
+				if (sampleM == null)
+					mSample[sample] = Double.NaN;
+				else
+					mSample[sample] = sampleM;
 			}
 
 			gammaSample = trim(gammaSample);
@@ -129,14 +134,14 @@ public class Main {
 			double[] aSample = new double[NUM_SAMPLES];
 
 			for (int sample = 0; sample < NUM_SAMPLES; sample++) {
-				TreeSimul example = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, N[trial]);
-				TreeLeaves exampleTree = example.toTreeLeaves();
+				TreeSimul sampleTree = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, N[trial]);
+				TreeLeaves sampleLeaves = sampleTree.toTreeLeaves();
 
-				Invert1Mer exampleInverted = new Invert1Mer(MU, LAMBDA, M, exampleTree);
+				Invert1Mer inverted = new Invert1Mer(LAMBDA, MU, M, sampleLeaves);
 
-				nuSample[sample] = exampleInverted.getNu();
-				pi0Sample[sample] = exampleInverted.getPi0();
-				aSample[sample] = exampleInverted.getA();
+				nuSample[sample] = inverted.getNu();
+				pi0Sample[sample] = inverted.getPi0();
+				aSample[sample] = inverted.getA();
 			}
 
 			System.out.println("TRIMMING");
@@ -165,6 +170,60 @@ public class Main {
 		Chart.ErrorChart(xAxis, "nu", nu, nuDeviation, NU, logN);
 		Chart.ErrorChart(xAxis, "pi0", pi0, pi0Deviation, PI0, logN);
 		Chart.ErrorChart(xAxis, "a", a, aDeviation, A, logN);
+	}
+
+	public static void starTreeState() {
+		// set length process parameters
+		final double LAMBDA = 1;
+		final double MU = 0.7;
+		final double NU = 0.2;
+		final double PI0 = 0.3;
+		final String ROOT = "10000000";
+		final int M = ROOT.length();
+
+		int[] N = { 1, 10, 100, 1000, 10000, 100000 };
+		int numIter = N.length;
+
+		// initialize arrays
+		// logN is the number of leaves for each trial
+		int[] logN = new int[numIter];
+
+		String[] root = new String[numIter];
+
+		// run trials
+		for (int trial = 0; trial < numIter; trial++) {
+			int num = N[trial];
+			System.out.println("Current trial: " + trial);
+
+			logN[trial] = (int) Math.round(Math.log10(num));
+			final int NUM_SAMPLES = 50;
+
+			int[] count = new int[M]; // counts the number of 1's across all samples at each index
+
+			for (int sample = 0; sample < NUM_SAMPLES; sample++) {
+				TreeSimul sampleTree = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, N[trial]);
+				TreeLeaves sampleLeaves = sampleTree.toTreeLeaves();
+
+				InvertState inverted = new InvertState(LAMBDA, MU, NU, M, PI0, sampleLeaves);
+
+				String sampleRootState = inverted.getRootState();
+				for (int i = 0; i < M; i++) {
+					if (sampleRootState.charAt(i) == '1')
+						count[i]++;
+				}
+			}
+
+			root[trial] = "";
+			for (int i = 0; i < M; i++) {
+				root[trial] += (count[i] > NUM_SAMPLES / 2) ? '1' : '0';
+				System.out.println(i + "\t" + count[i]);
+			}
+
+			System.out.println("Trial: " + trial);
+			System.out.println("Root: " + root[trial]);
+		}
+
+		System.out.println("ROOT: " + ROOT);
 	}
 
 	private static double[] trim(double[] data) {
@@ -211,6 +270,6 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		starTree1Mer();
+		starTreeState();
 	}
 }

@@ -43,7 +43,6 @@ public class InvertLength extends Invert {
         try {
             gamma /= 2 * C2prime * C2prime + 2 * C2prime - C3prime + 2;
         } catch (ArithmeticException e) {
-            System.out.println("here2");
             gamma = Double.NaN;
         }
     }
@@ -55,7 +54,6 @@ public class InvertLength extends Invert {
         try {
             beta /= 1 + gamma;
         } catch (ArithmeticException e) {
-            System.out.println("here3");
             beta = Double.NaN;
         }
     }
@@ -63,11 +61,12 @@ public class InvertLength extends Invert {
     /** Estimates M. */
     private void estimateM() {
         if (Double.isNaN(beta) || beta == 0) {
-            // System.out.println("here4");
-            M = Double.NaN;
+            M = null;
         } else {
             // System.out.println("M calculation: " + C[0] + " " + beta);
-            M = Math.round(C[0] / beta);
+            Long val = Math.round(C[0] / beta);
+            M = val.intValue();
+            
         }
     }
 
@@ -79,7 +78,7 @@ public class InvertLength extends Invert {
         return beta;
     }
 
-    public double getM() {
+    public Integer getM() {
         return M;
     }
 }

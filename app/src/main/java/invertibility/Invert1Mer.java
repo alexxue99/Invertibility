@@ -10,13 +10,13 @@ public class Invert1Mer extends Invert {
      * Inverts the process based on given data on the sequences at
      * the leaves, as well as on mu, lambda, and M, to estimate nu, pi, and a.
      */
-    public Invert1Mer(double mu, double lambda, int M, TreeLeaves tree) {
+    public Invert1Mer(double lambda, double mu, int M, TreeLeaves tree) {
         super(tree);
 
         D = new double[3];
 
-        this.mu = mu;
         this.lambda = lambda;
+        this.mu = mu;
         this.M = M;
 
         calcPartials();

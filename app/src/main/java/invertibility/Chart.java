@@ -44,6 +44,7 @@ public class Chart {
 					PlotOrientation.VERTICAL,
 					true, false, false);
 
+			@SuppressWarnings("unchecked")
 			XYPlot<String> plot = (XYPlot<String>) chart.getPlot();
 			XYErrorRenderer errorRenderer = new XYErrorRenderer();
 			plot.setRenderer(errorRenderer);

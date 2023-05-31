@@ -12,7 +12,7 @@ public abstract class Invert {
 	protected double lambda;
 	protected double gamma;
 	protected double beta;
-	protected double M;
+	protected Integer M;
 
 	protected double exp;
 	protected double nu;
