@@ -41,7 +41,7 @@ public class InvertState extends Invert {
 		return (-psi(t) + 1 - eta(t)) / (1 - eta(t));
 	}
 
-	private double p(double t) {
+	private double p(double t, boolean zero) {
 		double sum = 0;
 
 		double eta = eta(t);
@@ -50,12 +50,12 @@ public class InvertState extends Invert {
 
 		String[] seq = tree.getSeq();
 		for (String s : seq) {
-			sum += pi0 * phi * (1 - Math.pow(eta, s.length()));
+			sum += ((zero) ? pi0 : (1  - pi0)) * phi * (1 - Math.pow(eta, s.length()));
 
 			double sum2 = 0;
 			double powerEta = 1;
 			for (int i = 0; i < s.length(); i++) {
-				sum2 += (s.charAt(i) == '0') ? powerEta : 0;
+				sum2 += (s.charAt(i) == '1' ^ zero) ? powerEta : 0;
 				powerEta *= eta;
 			}
 
@@ -92,11 +92,12 @@ public class InvertState extends Invert {
 		double [][] U = new double[M][2];
 
 		for (int i = 0; i < M; i++) {
-			double p = p(1.01 + i / 100.0);
+			double p0 = p(1.01 + i / 100.0, true);
+			double p1 = p(1.01 + i / 100.0, false);
 			double secondTerm = phi(1.01 + i / 100.0) * (1 - Math.pow(eta(1.01 + i / 100.0), M));
 	
-			U[i][0] = p - pi0 * secondTerm;
-			U[i][1] = (1 - p) - (1 - pi0) * secondTerm;
+			U[i][0] = p0 - pi0 * secondTerm;
+			U[i][1] = p1 - (1 - pi0) * secondTerm;
 		}
 
 		return new SimpleMatrix(U);

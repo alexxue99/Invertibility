@@ -178,7 +178,7 @@ public class Main {
 		final double MU = 0.7;
 		final double NU = 0.2;
 		final double PI0 = 0.3;
-		final String ROOT = "10000000";
+		final String ROOT = "11010111";
 		final int M = ROOT.length();
 
 		int[] N = { 1, 10, 100, 1000, 10000, 100000 };
