@@ -172,16 +172,17 @@ public class Main {
 		Chart.ErrorChart(xAxis, "a", a, aDeviation, A, logN);
 	}
 
-	public static void starTreeState() {
+	public static void starTreeState(int method) {
 		// set length process parameters
 		final double LAMBDA = 1;
-		final double MU = 0.7;
+		final double MU = 0.3;
 		final double NU = 0.2;
 		final double PI0 = 0.3;
-		final String ROOT = "11010111";
+		// final String ROOT = "11010111";
+		final String ROOT = "1101";
 		final int M = ROOT.length();
 
-		int[] N = { 1, 10, 100, 1000, 10000, 100000 };
+		int[] N = { 1000, 10000, };
 		int numIter = N.length;
 
 		// initialize arrays
@@ -189,6 +190,8 @@ public class Main {
 		int[] logN = new int[numIter];
 
 		String[] root = new String[numIter];
+
+		double[] diff = new double[numIter];
 
 		// run trials
 		for (int trial = 0; trial < numIter; trial++) {
@@ -198,32 +201,43 @@ public class Main {
 			logN[trial] = (int) Math.round(Math.log10(num));
 			final int NUM_SAMPLES = 50;
 
+			double[] diffSample = new double[NUM_SAMPLES];
 			int[] count = new int[M]; // counts the number of 1's across all samples at each index
 
 			for (int sample = 0; sample < NUM_SAMPLES; sample++) {
 				TreeSimul sampleTree = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, N[trial]);
 				TreeLeaves sampleLeaves = sampleTree.toTreeLeaves();
 
-				InvertState inverted = new InvertState(LAMBDA, MU, NU, M, PI0, sampleLeaves);
+				InvertState inverted = new InvertState(LAMBDA, MU, NU, M, PI0, sampleLeaves, method);
 
 				String sampleRootState = inverted.getRootState();
 				for (int i = 0; i < M; i++) {
 					if (sampleRootState.charAt(i) == '1')
 						count[i]++;
+					if (sampleRootState.charAt(i) != ROOT.charAt(i))
+						diffSample[sample]++;
 				}
 			}
+
+			diff[trial] = average(diffSample);
+
+			System.out.println("Trial: " + trial);
+			System.out.println("diff: " + diff[trial]);
 
 			root[trial] = "";
 			for (int i = 0; i < M; i++) {
 				root[trial] += (count[i] > NUM_SAMPLES / 2) ? '1' : '0';
-				System.out.println(i + "\t" + count[i]);
+			//	System.out.println(i + "\t" + count[i]);
 			}
 
 			System.out.println("Trial: " + trial);
 			System.out.println("Root: " + root[trial]);
 		}
 
-		System.out.println("ROOT: " + ROOT);
+		String xAxis = "log N";
+		// display charts
+		System.out.println("REAL ROOT: " + ROOT);
+		Chart.LineChart(xAxis, "difference", diff, logN);
 	}
 
 	private static double[] trim(double[] data) {
@@ -270,6 +284,8 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		starTreeState();
+		int method = 1;
+		System.out.println("Method " + method);
+		starTreeState(method);
 	}
 }
