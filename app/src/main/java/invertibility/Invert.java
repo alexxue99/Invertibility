@@ -14,7 +14,6 @@ public abstract class Invert {
 	protected double beta;
 	protected Integer M;
 
-	protected double exp;
 	protected double nu;
 	protected double a;
 	protected double pi0;

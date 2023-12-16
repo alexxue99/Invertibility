@@ -8,11 +8,7 @@ import java.util.List;
 
 import org.ejml.data.*;
 import org.ejml.dense.row.decomposition.lu.*;
-import org.ejml.interfaces.decomposition.*;
 import org.ejml.simple.*;
-
-import invertibility.Invert;
-import invertibility.TreeLeaves;
 
 public class InvertState extends Invert {
 	private String rootState;
@@ -88,7 +84,7 @@ public class InvertState extends Invert {
 			double sum2 = 0;
 			double powerEta = 1;
 			for (int i = 0; i < s.length(); i++) {
-				sum2 += (s.charAt(i) == '1' ^ zero) ? powerEta : 0;
+				sum2 += ((s.charAt(i) == '1') ^ zero) ? powerEta : 0;
 				powerEta *= eta;
 			}
 
@@ -96,37 +92,6 @@ public class InvertState extends Invert {
 		}
 
 		return sum / seq.length;
-	}
-
-	private void check() {
-		// double[][] Y = { { 0, 1 }, { 0, 1 }, { 1, 0 }, { 0, 1 }, { 1, 0 }, { 0, 1 },
-		// { 0, 1 }, { 0, 1 } };
-		double[][] Y = { { 0, 1 }, { 0, 1 }, { 1, 0 }, { 0, 1 } };
-
-		double[][] V = new double[M][M];
-		for (int i = 0; i < M; i++) {
-			double eta = eta(1.01 + i / 1.0);
-
-			V[i][0] = 1;
-			for (int j = 1; j < M; j++) {
-				V[i][j] = V[i][j - 1] * eta;
-			}
-		}
-
-		double[] Psi = new double[M];
-		for (int i = 0; i < M; i++) {
-			Psi[i] = psi(1.01 + i / 1.0);
-		}
-
-		SimpleMatrix ans = (SimpleMatrix.diag(Psi)).mult(new SimpleMatrix(V)).mult(new SimpleMatrix(Y));
-		System.out.println("--------");
-		ans.print();
-		// U().print();
-	}
-
-	private void check2() {
-		System.out.println("p: " + p(1, true));
-		System.out.println(pi0 * phi(1) * (1 - eta(1)) + psi(1));
 	}
 
 	private SimpleMatrix V() {
@@ -247,14 +212,14 @@ public class InvertState extends Invert {
 		}
 
 		// pivot
-		for (int i = 0; i < pivot.length; i++) {
-			System.out.println(pivot[i]);
-		}
+		// for (int i = 0; i < pivot.length; i++) {
+		// 	System.out.println(pivot[i]);
+		// }
 
-		System.out.println("x");
-		for (int i = 0; i < M; i++) {
-			System.out.println(x[pivot[i]]);
-		}
+		// System.out.println("x");
+		// for (int i = 0; i < M; i++) {
+		// 	System.out.println(x[pivot[i]]);
+		// }
 
 		SimpleMatrix prod = l.mult(u);
 		for (int i = 0; i < M; i++) {
@@ -262,20 +227,21 @@ public class InvertState extends Invert {
 			for (int j = 0; j < M; j++) {
 				sum += prod.get(i, j) * x[j];
 			}
-			System.out.println(sum);
+			//System.out.println(sum);
 		}
 
-		System.out.println("U");
-		for (int i = 0; i < M; i++) {
-			System.out.println(U[i]);
-		}
+		// System.out.println("U");
+		// for (int i = 0; i < M; i++) {
+		// 	System.out.println(U[i]);
+		// }
 
 		for (int i = 0; i < M; i++) {
 			rootState += (x[pivot[i]] - 0.5 > 0) ? '0' : '1';
 		}
 	}
 
-	private double dist(boolean[] Y) {
+	// calculates length of U0 - Psi V Y0
+	private double length(boolean[] Y) {
 		double dist = 0;
 		for (int i = 0; i < M; i++) {
 			double sum = 0;
@@ -306,7 +272,7 @@ public class InvertState extends Invert {
 		min = Double.MAX_VALUE;
 		estimateRootState3(0);
 
-		System.out.println(min);
+		//System.out.println(min);
 		for (int i = 0; i < M; i++) {
 			rootState += (Y[i]) ? '0' : '1';
 		}
@@ -316,8 +282,8 @@ public class InvertState extends Invert {
 	// 0...index-1 is predetermined
 	private void estimateRootState3(int index) {
 		if (index == M) {
-			if (dist(root) < min) {
-				min = dist(root);
+			if (length(root) < min) {
+				min = length(root);
 				Y = Arrays.copyOf(root, M);
 			}
 			return;
@@ -339,13 +305,13 @@ public class InvertState extends Invert {
 		min = Double.MAX_VALUE;
 		for (int i = 0; i < M; i++) {
 			root[i] = false;
-			if (dist(root) < min) {
-				min = dist(root);
+			if (length(root) < min) {
+				min = length(root);
 			}
 
 			root[i] = true;
-			if (dist(root) < min) {
-				min = dist(root);
+			if (length(root) < min) {
+				min = length(root);
 			} else {
 				root[i] = false;
 			}
@@ -361,18 +327,20 @@ public class InvertState extends Invert {
 	// OR if gamma < 1 and beta(2-g) > 1
 	private void estimateRootState5() {
 		root = new boolean[M];
+		double t = 2;
+		double eta = eta(t);
+		double LHS = p(t, true) - pi0 * phi(t) * (1 - Math.pow(eta, M));
+		LHS /= psi(t);
 
-		prod = Psi().mult(V());
-		U = Uvec();
-		prod.print();
-		System.out.println("U0: " + U[0]);
-
-		double cumSum = 0;
+		double sum = 0;
+		double powEta = 1;
 		for (int i = 0; i < M; i++) {
-			if (cumSum + prod.get(0, i) < U[0]) {
+			System.out.println(i + " " + (LHS - sum - powEta));
+			if (LHS > sum + powEta) {
 				root[i] = true;
-				cumSum += prod.get(0, i);
+				sum += powEta;
 			}
+			powEta *= eta;
 		}
 
 		for (int i = 0; i < M; i++) {
