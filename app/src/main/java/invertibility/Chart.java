@@ -107,21 +107,30 @@ public class Chart {
 				List<Double> list = new ArrayList<Double>();
 				for (double d : estimated[i])
 					list.add(d);
-				dataset.add(list, "", i);
+				dataset.add(list, "", N[i]);
 			}
 
 			CategoryAxis x = new CategoryAxis(xAxis);
 			NumberAxis y = new NumberAxis(var);
 			y.setAutoRangeIncludesZero(false);
-			BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+			ExtendedBoxAndWhiskerRenderer renderer = new ExtendedBoxAndWhiskerRenderer();
+
 			CategoryPlot<String, Integer> plot = new CategoryPlot<String, Integer>(dataset, x, y, renderer);
 
 			ValueMarker marker = new ValueMarker(exact);
 			marker.setPaint(Color.BLUE);
 			plot.addRangeMarker(marker);
+
+			plot.setBackgroundPaint(Color.WHITE);
+						
 			renderer.setSeriesPaint(0, Color.RED);
 			renderer.setSeriesVisibleInLegend(0, false);
-			plot.setBackgroundPaint(Color.WHITE);
+			
+			renderer.setFillBox(false);
+			renderer.setMeanVisible(false);
+			//renderer.setMaxOutlierVisible(false);
+			//renderer.setMinOutlierVisible(false);
+			renderer.setMaximumBarWidth(0.10);
 
 			String path = "C:\\Users\\alexx\\workspace\\Invertibility\\cm\\cmunrm.ttf";
 			Font customFont = null;
@@ -141,6 +150,7 @@ public class Chart {
 			plot.getDomainAxis().setLabelFont(customFont);
 
 			JFreeChart chart = new JFreeChart("", customFont, plot, true);
+			chart.setBackgroundPaint(Color.WHITE);
 			ChartPanel chartPanel = new ChartPanel(chart);
 			chartPanel.setPreferredSize(new java.awt.Dimension(540, 360));
 
@@ -165,7 +175,7 @@ public class Chart {
 				plain = true;
 		}
 
-		Chart_AWT chart = new Chart_AWT("\u03B3 \u03B2 \u03BD", var + " vs. " + xAxis, "", var,
+		Chart_AWT chart = new Chart_AWT(xAxis, var + " vs. " + xAxis, "", var,
 				estimated, deviation, exact,
 				N, plain);
 		chart.pack();

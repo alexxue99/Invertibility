@@ -33,8 +33,8 @@ public class Invert1Mer extends Invert {
         this.M = M;
 
         calcPartials();
-        updateCs();
-        // updateDs();
+        updateCs(); // maybe not needed, move updateCs in invert to invertlength?
+        // updateDs(); only needed for other way of doing 1mer?
 
         estimateNu();
         estimatepi0();

@@ -16,8 +16,8 @@ public class Main {
 		final double GAMMA = LAMBDA / MU;
 		final double BETA = Math.exp(LAMBDA - MU);
 
-		// int[] Ns = { 1000, 10000, 100000, 1000000 };
-		int[] N = { 1000, 10000 };
+		// int[] N = { 1000, 10000, 100000, 1000000 };
+		int[] N = { 100, 1000 };
 		int numIter = N.length;
 
 		// initialize arrays
@@ -59,13 +59,9 @@ public class Main {
 					mSample[sample] = sampleM;
 			}
 
-			gammaSample = trim(gammaSample);
-			betaSample = trim(betaSample);
-			mSample = trim(mSample);
-
-			gamma[trial] = gammaSample;
-			beta[trial] = betaSample;
-			m[trial] = mSample;
+			gamma[trial] = trim(gammaSample);
+			beta[trial] = trim(betaSample);
+			m[trial] = trim(mSample);
 		}
 
 		String xAxis = "log N";
@@ -92,7 +88,7 @@ public class Main {
 		}
 		final int A = temp;
 
-		int[] N = { 1000, 10000, 100000, 1000000 };
+		int[] N = { 1000, 10000 };
 		int numIter = N.length;
 
 		// initialize arrays
@@ -156,7 +152,7 @@ public class Main {
 		final double NU = 0.2;
 		final double PI0 = 0.3;
 		final String ROOT = "11010111";
-	//	final String ROOT = "1101";
+		// final String ROOT = "1101";
 		final int M = ROOT.length();
 
 		int[] N = { 1000 };
@@ -220,6 +216,63 @@ public class Main {
 		Chart.ErrorChart(xAxis, "difference", diff, diffDeviation, -1, logN);
 	}
 
+	public static void starTreePairwiseDistance() {
+		// set length process parameters
+		final double LAMBDA = 1;
+		final double MU = 0.7;
+		final double NU = 3;
+		final double PI0 = 0.5;
+		final String ROOT = "01010101";
+
+		// set the actual values for M
+		final int M = ROOT.length();
+
+		int[] N = { 1000, 10000 };
+		// int[] N = { 100, 1000 };
+		int numIter = N.length;
+
+		// initialize arrays
+		// logN is the number of leaves for each trial
+		int[] logN = new int[numIter];
+
+		final int NUM_SAMPLES = 30;
+		double[][] pwd = new double[numIter][NUM_SAMPLES];
+		double[][] wd = new double[numIter][NUM_SAMPLES];
+
+		// run trials
+		for (int trial = 0; trial < numIter; trial++) {
+			int num = N[trial];
+			System.out.println("Current trial: " + trial);
+
+			logN[trial] = (int) Math.round(Math.log10(num));
+
+			double[] pwdSample = new double[NUM_SAMPLES];
+			double[] wdSample = new double[NUM_SAMPLES];
+
+			for (int sample = 0; sample < NUM_SAMPLES; sample++) {
+				TreeSimul sampleTree = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, N[trial]);
+				TreeLeaves sampleLeaves = sampleTree.toTreeLeaves();
+
+				TreeSimul sampleTree2 = new TreeSimul(2*LAMBDA, 2*MU, 2*NU, PI0, ROOT, N[trial]);
+				TreeLeaves sampleLeaves2 = sampleTree2.toTreeLeaves();
+
+				InvertPairwiseDistance inverted = new InvertPairwiseDistance(LAMBDA, MU, 2*LAMBDA, 2*MU, M, sampleLeaves, sampleLeaves2);
+
+				pwdSample[sample] = inverted.getPairwiseDistance();
+				wdSample[sample] = inverted.getAncestorDistance();
+			}
+
+			pwd[trial] = trim(pwdSample);
+			wd[trial] = trim(wdSample);
+		}
+
+		String xAxis = "log N";
+		// display charts
+		System.out.println("exact: " + 3*(MU - LAMBDA));
+		Chart.BoxWhiskerChart(xAxis, "pwd", pwd, 3*(MU - LAMBDA), logN);
+		Chart.BoxWhiskerChart(xAxis, "wd", wd, 0, logN);
+	}
+
 	private static double[] trim(double[] data) {
 		Arrays.sort(data);
 
@@ -266,7 +319,7 @@ public class Main {
 	public static void main(String[] args) {
 		int method = 6;
 		System.out.println("Method " + method);
-		//starTreeState(method);
-		starTreeLength();
+		// starTreeState(method);
+		starTreePairwiseDistance();
 	}
 }
