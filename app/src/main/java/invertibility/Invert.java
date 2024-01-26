@@ -21,6 +21,9 @@ public abstract class Invert {
 	protected double[] partials;
 	protected double[] C;
 
+	public Invert() {
+	}
+
 	public Invert(TreeLeaves tree) {
 		this.tree = tree;
 		N = tree.getN();

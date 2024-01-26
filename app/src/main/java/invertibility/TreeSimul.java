@@ -72,10 +72,7 @@ public class TreeSimul {
 	 * Evolves string s along an edge, using the length process
 	 * parameters.
 	 */
-	private String evolve() {
-		String s = root;
-		double t = 1;
-
+	private String evolve(String s, double t) {
 		while (t > 0) {
 			double[] timings = new double[s.length() * 3];
 
@@ -118,10 +115,19 @@ public class TreeSimul {
 		return s;
 	}
 
+	public int pairwiseDistance(double tw, double t1, double t2) {
+		String s = evolve(root, tw);
+		
+		int l1 = evolve(s, t1).length();
+		int l2 = evolve(s, t2).length();
+
+		return l1*l2;
+	}
+
 	/** Simulates the length process on the whole tree. */
 	public void runLengthProcess() {
 		for (int i = 0 ; i < N; i++) {
-			seqLeaves[i] = evolve();
+			seqLeaves[i] = evolve(root, 1);
 		}
 	}
 

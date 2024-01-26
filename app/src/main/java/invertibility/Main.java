@@ -1,5 +1,6 @@
 package invertibility;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Main {
@@ -224,6 +225,10 @@ public class Main {
 		final double PI0 = 0.5;
 		final String ROOT = "01010101";
 
+		final double tw = 1;
+		final double t1 = 1;
+		final double t2 = 2;
+
 		// set the actual values for M
 		final int M = ROOT.length();
 
@@ -249,14 +254,14 @@ public class Main {
 			double[] pwdSample = new double[NUM_SAMPLES];
 			double[] wdSample = new double[NUM_SAMPLES];
 
+			TreeSimul sampleTree = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, 0);
 			for (int sample = 0; sample < NUM_SAMPLES; sample++) {
-				TreeSimul sampleTree = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, N[trial]);
-				TreeLeaves sampleLeaves = sampleTree.toTreeLeaves();
+				int[] products = new int[N[trial]];
+				for (int i = 0; i < N[trial]; i++)
+					products[i] = sampleTree.pairwiseDistance(tw, t1, t2);
 
-				TreeSimul sampleTree2 = new TreeSimul(2*LAMBDA, 2*MU, 2*NU, PI0, ROOT, N[trial]);
-				TreeLeaves sampleLeaves2 = sampleTree2.toTreeLeaves();
-
-				InvertPairwiseDistance inverted = new InvertPairwiseDistance(LAMBDA, MU, 2*LAMBDA, 2*MU, M, sampleLeaves, sampleLeaves2);
+				InvertPairwiseDistance inverted = new InvertPairwiseDistance(LAMBDA, MU, 2, 3, M,
+						products);
 
 				pwdSample[sample] = inverted.getPairwiseDistance();
 				wdSample[sample] = inverted.getAncestorDistance();
@@ -268,9 +273,9 @@ public class Main {
 
 		String xAxis = "log N";
 		// display charts
-		System.out.println("exact: " + 3*(MU - LAMBDA));
-		Chart.BoxWhiskerChart(xAxis, "pwd", pwd, 3*(MU - LAMBDA), logN);
-		Chart.BoxWhiskerChart(xAxis, "wd", wd, 0, logN);
+		System.out.println("exact: " + (t1 + t2) * MU);
+		Chart.BoxWhiskerChart(xAxis, "pwd", pwd, (t1 + t2) * MU, logN);
+		Chart.BoxWhiskerChart(xAxis, "wd", wd, tw * MU, logN);
 	}
 
 	private static double[] trim(double[] data) {
