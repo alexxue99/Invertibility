@@ -99,7 +99,7 @@ public class Chart {
 		// box and whisker plot
 		public Chart_AWT(String xAxis, String applicationTitle, String chartTitle, String var, double[][] estimated,
 				double exact,
-				int[] N, boolean plain) {
+				int[] N) {
 			super(applicationTitle);
 
 			DefaultBoxAndWhiskerCategoryDataset<String, Integer> dataset = new DefaultBoxAndWhiskerCategoryDataset<String, Integer>();
@@ -107,7 +107,7 @@ public class Chart {
 				List<Double> list = new ArrayList<Double>();
 				for (double d : estimated[i])
 					list.add(d);
-				dataset.add(list, "", N[i]);
+				dataset.add(list, "", (int) Math.round(Math.log10(N[i])));
 			}
 
 			CategoryAxis x = new CategoryAxis(xAxis);
@@ -122,32 +122,38 @@ public class Chart {
 			plot.addRangeMarker(marker);
 
 			plot.setBackgroundPaint(Color.WHITE);
-						
+
 			renderer.setSeriesPaint(0, Color.RED);
 			renderer.setSeriesVisibleInLegend(0, false);
-			
+
 			renderer.setFillBox(false);
 			renderer.setMeanVisible(false);
-			//renderer.setMaxOutlierVisible(false);
-			//renderer.setMinOutlierVisible(false);
+			
 			renderer.setMaximumBarWidth(0.10);
+			renderer.setWhiskerWidth(0.6);
 
-			String path = "C:\\Users\\alexx\\workspace\\Invertibility\\cm\\cmunrm.ttf";
+			String reg = "C:\\Users\\alexx\\workspace\\Invertibility\\cm\\cmr12.ttf";
+			String italic = "C:\\Users\\alexx\\workspace\\Invertibility\\cm\\cmmi10.ttf";
 			Font customFont = null;
 			try {
-				customFont = Font.createFont(Font.TRUETYPE_FONT, new File(path));
+				customFont = Font.createFont(Font.TRUETYPE_FONT, new File(reg));
 				GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 				ge.registerFont(customFont);
-				System.out.println("SUCCESS");
+
+				customFont = Font.createFont(Font.TRUETYPE_FONT, new File(italic));
+				ge.registerFont(customFont);
 			} catch (Exception e) {
 				System.out.println("Font error");
 			}
 
-			customFont = new Font("CMU Serif", plain ? Font.PLAIN : Font.ITALIC, 20);
+			customFont = new Font("cmmi10", Font.ITALIC, 15);
+			//customFont = new Font("cmr12", Font.PLAIN, 15);
 			plot.getRangeAxis().setLabelFont(customFont);
-
-			customFont = new Font("CMU Serif", Font.PLAIN, 20);
 			plot.getDomainAxis().setLabelFont(customFont);
+
+			customFont = new Font("cmr12", Font.PLAIN, 15);
+			plot.getRangeAxis().setTickLabelFont(customFont);
+			plot.getDomainAxis().setTickLabelFont(customFont);
 
 			JFreeChart chart = new JFreeChart("", customFont, plot, true);
 			chart.setBackgroundPaint(Color.WHITE);
@@ -161,21 +167,22 @@ public class Chart {
 	public static void ErrorChart(String xAxis, String var, double[] estimated, double[] deviation,
 			double exact, int[] N) {
 		boolean plain = false;
+		String translatedVar = var;
 		switch (var) {
 			case "gamma":
-				var = "\u03B3";
+				translatedVar = "\u00B0";
 				break;
 			case "beta":
-				var = "\u03B2";
+				translatedVar = "\u00AF";
 				break;
 			case "nu":
-				var = "\u03BD";
+				translatedVar = "\u00BA";
 				break;
 			case "difference":
 				plain = true;
 		}
 
-		Chart_AWT chart = new Chart_AWT(xAxis, var + " vs. " + xAxis, "", var,
+		Chart_AWT chart = new Chart_AWT(xAxis, var + " vs. " + xAxis, "", translatedVar,
 				estimated, deviation, exact,
 				N, plain);
 		chart.pack();
@@ -184,24 +191,22 @@ public class Chart {
 
 	public static void BoxWhiskerChart(String xAxis, String var, double[][] estimated,
 			double exact, int[] N) {
-		boolean plain = false;
+		String translatedVar = var;
 		switch (var) {
 			case "gamma":
-				var = "\u03B3";
+				translatedVar = "\u00B0";
 				break;
 			case "beta":
-				var = "\u03B2";
+				translatedVar = "\u00AF";
 				break;
 			case "nu":
-				var = "\u03BD";
+				translatedVar = "\u00BA";
 				break;
-			case "difference":
-				plain = true;
 		}
 
-		Chart_AWT chart = new Chart_AWT(xAxis, var + " vs. " + xAxis, "", var,
+		Chart_AWT chart = new Chart_AWT(xAxis, var + " vs. " + xAxis, "", translatedVar,
 				estimated, exact,
-				N, plain);
+				N);
 		chart.pack();
 		chart.setVisible(true);
 	}

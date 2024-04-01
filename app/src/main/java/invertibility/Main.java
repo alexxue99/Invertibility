@@ -8,7 +8,7 @@ public class Main {
 		// set length process parameters
 		final double LAMBDA = 1;
 		final double MU = 0.7;
-		final double NU = 3;
+		final double NU = 0.2;
 		final double PI0 = 0.5;
 		final String ROOT = "01010101";
 
@@ -17,16 +17,14 @@ public class Main {
 		final double GAMMA = LAMBDA / MU;
 		final double BETA = Math.exp(LAMBDA - MU);
 
-		// int[] N = { 1000, 10000, 100000, 1000000 };
-		int[] N = { 100, 1000 };
+		int[] N = { 1000, 10000, 100000, 1000000 };
+		//int[] N = { 100, 1000 };
 		int numIter = N.length;
 
 		// initialize arrays
-		// logN is the number of leaves for each trial
 		// gamma is the estimated gamma for each trial
 		// beta is the estimated beta for each trial
 		// m is the estimated m for each trial
-		int[] logN = new int[numIter];
 
 		final int NUM_SAMPLES = 50;
 		double[][] gamma = new double[numIter][NUM_SAMPLES];
@@ -35,10 +33,7 @@ public class Main {
 
 		// run trials
 		for (int trial = 0; trial < numIter; trial++) {
-			int num = N[trial];
 			System.out.println("Current trial: " + trial);
-
-			logN[trial] = (int) Math.round(Math.log10(num));
 
 			double[] gammaSample = new double[NUM_SAMPLES];
 			double[] betaSample = new double[NUM_SAMPLES];
@@ -68,9 +63,9 @@ public class Main {
 		String xAxis = "log N";
 		// display charts
 		System.out.println("gamma: " + GAMMA + " beta: " + BETA + " M: " + M);
-		Chart.BoxWhiskerChart(xAxis, "gamma", gamma, GAMMA, logN);
-		Chart.BoxWhiskerChart(xAxis, "beta", beta, BETA, logN);
-		Chart.BoxWhiskerChart(xAxis, "M", m, M, logN);
+		Chart.BoxWhiskerChart(xAxis, "gamma", gamma, GAMMA, N);
+		Chart.BoxWhiskerChart(xAxis, "beta", beta, BETA, N);
+		Chart.BoxWhiskerChart(xAxis, "M", m, M, N);
 	}
 
 	public static void starTree1Mer() {
@@ -89,18 +84,16 @@ public class Main {
 		}
 		final int A = temp;
 
-		int[] N = { 1000, 10000 };
+		int[] N = { 1000, 10000, 100000, 1000000 };
 		int numIter = N.length;
 
 		// initialize arrays
 		// logN is the number of leaves for each trial
 		int[] logN = new int[numIter];
 
-		double[] nu = new double[numIter];
-		double[] a = new double[numIter];
-
-		double[] nuDeviation = new double[numIter];
-		double[] aDeviation = new double[numIter];
+		final int NUM_SAMPLES = 50;
+		double[][] nu = new double[numIter][NUM_SAMPLES];
+		double[][] a = new double[numIter][NUM_SAMPLES];
 
 		// run trials
 		for (int trial = 0; trial < numIter; trial++) {
@@ -108,7 +101,6 @@ public class Main {
 			System.out.println("Current trial: " + trial);
 
 			logN[trial] = (int) Math.round(Math.log10(num));
-			final int NUM_SAMPLES = 50;
 
 			double[] nuSample = new double[NUM_SAMPLES];
 			double[] aSample = new double[NUM_SAMPLES];
@@ -124,26 +116,16 @@ public class Main {
 			}
 
 			System.out.println("TRIMMING");
-			nuSample = trim(nuSample);
-			aSample = trim(aSample);
-
-			nu[trial] = average(nuSample);
-			nuDeviation[trial] = standardDeviation(nu[trial], nuSample);
-
-			a[trial] = average(aSample);
-			aDeviation[trial] = standardDeviation(a[trial], aSample);
-
-			System.out.println("Trial: " + trial);
-			System.out.println("nu: " + nu[trial] + " " + nuDeviation[trial]);
-			// System.out.println("pi0: " + pi0[trial] + " " + pi0Deviation[trial]);
-			System.out.println("a: " + a[trial] + " " + aDeviation[trial]);
+			nu[trial] = trim(nuSample);
+			a[trial] = trim(aSample);
 		}
 
 		String xAxis = "log N";
 		// display charts
 		System.out.println("nu: " + NU + " pi0: " + PI0 + " a: " + A);
-		Chart.ErrorChart(xAxis, "nu", nu, nuDeviation, NU, logN);
-		Chart.ErrorChart(xAxis, "a", a, aDeviation, A, logN);
+		Chart.BoxWhiskerChart(xAxis, "nu", nu, NU, N);
+		Chart.BoxWhiskerChart(xAxis, "a", a, A, N);
+
 	}
 
 	public static void starTreeState(int method) {
@@ -156,25 +138,21 @@ public class Main {
 		// final String ROOT = "1101";
 		final int M = ROOT.length();
 
-		int[] N = { 1000 };
+		int[] N = { 1000, 10000, 100000, 1000000 };
 		int numIter = N.length;
 
 		// initialize arrays
-		// logN is the number of leaves for each trial
-		int[] logN = new int[numIter];
 
 		String[] root = new String[numIter];
 
-		double[] diff = new double[numIter];
+		final int NUM_SAMPLES = 50;
+		double[][] diff = new double[numIter][NUM_SAMPLES];
 		double[] diffDeviation = new double[numIter];
 
 		// run trials
 		for (int trial = 0; trial < numIter; trial++) {
 			int num = N[trial];
 			System.out.println("Current trial: " + trial);
-
-			logN[trial] = (int) Math.round(Math.log10(num));
-			final int NUM_SAMPLES = 50;
 
 			double[] diffSample = new double[NUM_SAMPLES];
 
@@ -195,8 +173,7 @@ public class Main {
 				}
 			}
 
-			diff[trial] = average(diffSample);
-			diffDeviation[trial] = standardDeviation(diff[trial], diffSample);
+			diff[trial] = diffSample;
 
 			System.out.println("Trial: " + trial);
 			System.out.println("diff: " + diff[trial]);
@@ -214,25 +191,27 @@ public class Main {
 		String xAxis = "log N";
 		// display charts
 		System.out.println("REAL ROOT: " + ROOT);
-		Chart.ErrorChart(xAxis, "difference", diff, diffDeviation, -1, logN);
+		Chart.BoxWhiskerChart(xAxis, "difference", diff, -1, N);
 	}
 
 	public static void starTreePairwiseDistance() {
 		// set length process parameters
-		final double LAMBDA = 1;
-		final double MU = 0.7;
-		final double NU = 3;
+		final double LAMBDA = 0.5;
+		final double MU = 0.3;
+		final double NU = 0.01;
 		final double PI0 = 0.5;
 		final String ROOT = "01010101";
 
 		final double tw = 1;
-		final double t1 = 1;
-		final double t2 = 2;
+		final double t1 = 2;
+		final double t2 = 3;
+		final double tu = tw + t1;
+		final double tv = tw + t2;
 
 		// set the actual values for M
 		final int M = ROOT.length();
 
-		int[] N = { 1000, 10000 };
+		int[] N = { 1000, 10000, 100000, 1000000 };
 		// int[] N = { 100, 1000 };
 		int numIter = N.length;
 
@@ -240,9 +219,16 @@ public class Main {
 		// logN is the number of leaves for each trial
 		int[] logN = new int[numIter];
 
-		final int NUM_SAMPLES = 30;
+		final int NUM_SAMPLES = 50;
 		double[][] pwd = new double[numIter][NUM_SAMPLES];
 		double[][] wd = new double[numIter][NUM_SAMPLES];
+
+		TreeSimul sampleTree = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, 0);
+		double l1_approx = sampleTree.approxLength(tu, 10);
+		double l2_approx = sampleTree.approxLength(tv, 10);
+
+		double mean1 = M * Math.exp(LAMBDA * tu - MU * tu) - l1_approx;
+		double mean2 = M * Math.exp(LAMBDA * tv - MU * tv) - l2_approx;
 
 		// run trials
 		for (int trial = 0; trial < numIter; trial++) {
@@ -254,14 +240,15 @@ public class Main {
 			double[] pwdSample = new double[NUM_SAMPLES];
 			double[] wdSample = new double[NUM_SAMPLES];
 
-			TreeSimul sampleTree = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT, 0);
 			for (int sample = 0; sample < NUM_SAMPLES; sample++) {
-				int[] products = new int[N[trial]];
-				for (int i = 0; i < N[trial]; i++)
-					products[i] = sampleTree.pairwiseDistance(tw, t1, t2);
+				double covariance = 0;
+				for (int i = 0; i < N[trial];) {
+					double product = sampleTree.pairwiseDistance(tw, t1, t2, l1_approx, l2_approx, mean1, mean2);
+					covariance += (product - covariance) / ++i;
+				}
 
-				InvertPairwiseDistance inverted = new InvertPairwiseDistance(LAMBDA, MU, 2, 3, M,
-						products);
+				InvertPairwiseDistance inverted = new InvertPairwiseDistance(LAMBDA, MU, tu, tv, M,
+						covariance);
 
 				pwdSample[sample] = inverted.getPairwiseDistance();
 				wdSample[sample] = inverted.getAncestorDistance();
@@ -274,8 +261,8 @@ public class Main {
 		String xAxis = "log N";
 		// display charts
 		System.out.println("exact: " + (t1 + t2) * MU);
-		Chart.BoxWhiskerChart(xAxis, "pwd", pwd, (t1 + t2) * MU, logN);
-		Chart.BoxWhiskerChart(xAxis, "wd", wd, tw * MU, logN);
+		Chart.BoxWhiskerChart(xAxis, "pwd", pwd, (t1 + t2) * MU, N);
+		Chart.BoxWhiskerChart(xAxis, "wd", wd, tw * MU, N);
 	}
 
 	private static double[] trim(double[] data) {
@@ -322,9 +309,8 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		int method = 6;
+		int method = 3;
 		System.out.println("Method " + method);
-		// starTreeState(method);
-		starTreePairwiseDistance();
+		starTree1Mer();
 	}
 }

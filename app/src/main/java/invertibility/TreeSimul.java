@@ -22,24 +22,17 @@ public class TreeSimul {
 	 * Constructor to initialize tree.
 	 * 
 	 * @param lambda
-	 *                   is insertion rate.
+	 *               is insertion rate.
 	 * @param mu
-	 *                   is deletion rate.
+	 *               is deletion rate.
 	 * @param nu
-	 *                   is substitution rate.
+	 *               is substitution rate.
 	 * @param pi0
-	 *                   is probability that a character is 0.
-	 * @param rootVertex
-	 *                   is the integer corresponding to the root vertex.
+	 *               is probability that a character is 0.
 	 * @param root
-	 *                   is the string at the root.
-	 * @param edges
-	 *                   is the list of directed edges.
-	 * @param t
-	 *                   contains the times, where t[i] corresponds to the time for
-	 *                   the ith
-	 *                   edge.
+	 *               is the string at the root.
 	 */
+
 	public TreeSimul(double lambda, double mu, double nu, double pi0, String root,
 			int N) {
 		this.lambda = lambda;
@@ -51,7 +44,7 @@ public class TreeSimul {
 		this.N = N;
 
 		seqLeaves = new String[N];
-		
+
 		rand = new Random();
 
 		runLengthProcess();
@@ -115,18 +108,28 @@ public class TreeSimul {
 		return s;
 	}
 
-	public int pairwiseDistance(double tw, double t1, double t2) {
+	public double approxLength(double t, int num) {
+		int sum = 0;
+
+		for (int i = 0; i < num; i++) {
+			sum += evolve(root, t).length();
+		}
+
+		return (double) sum / num;
+	}
+
+	public double pairwiseDistance(double tw, double t1, double t2, double l1_approx, double l2_approx, double mean1, double mean2) {
 		String s = evolve(root, tw);
-		
+
 		int l1 = evolve(s, t1).length();
 		int l2 = evolve(s, t2).length();
 
-		return l1*l2;
+		return (l1 - l1_approx - mean1) * (l2 - l2_approx - mean2);
 	}
 
 	/** Simulates the length process on the whole tree. */
 	public void runLengthProcess() {
-		for (int i = 0 ; i < N; i++) {
+		for (int i = 0; i < N; i++) {
 			seqLeaves[i] = evolve(root, 1);
 		}
 	}

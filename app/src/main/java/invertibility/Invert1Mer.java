@@ -129,8 +129,8 @@ public class Invert1Mer extends Invert {
         // a = D[0] + M * (1 - pi0);
         // a /= exp;
 
-        a = partials[0] + M * pi1 * expnegnu / expmu;
-        a *= expmu / expnegnu;
+        a = partials[0] * expmu + M * pi1 * expnegnu;
+        a /= expnegnu;
     }
 
     public double getNu() {
