@@ -1,7 +1,7 @@
 package invertibility;
 
 /**
- * Class used to invert the length process parameters, given the lengths of the
+ * Class used to invert the TKF91 process parameters, given the
  * sequences at the leaves of a tree.
  */
 public abstract class Invert {
@@ -32,7 +32,7 @@ public abstract class Invert {
 		C = new double[3];
 	}
 
-	abstract protected void calcPartials();
+	abstract protected void calcPartials(); // implemented differently in Invert1Mer and InvertLength
 
 	protected double[] factorialMoments(int[] array) {
 		// estimate partials of G(z, t) with respect to z and evaluated at z = 1 and
@@ -48,20 +48,11 @@ public abstract class Invert {
 				try {
 					partials[j] += (lengths[j] - partials[j]) / i;
 				} catch (ArithmeticException e) {
-					System.out.println("PARTIALS");
+					System.out.println("Error in partial computation.");
 				}
 			}
 		}
 
 		return partials;
-	}
-
-	/* Prereq: partials are calculated */
-	protected void updateCs() {
-		// System.out.println("PARTIALS: " + partials[0] + " " + partials[1] + " " +
-		// partials[2]);
-		C[0] = partials[0];
-		C[1] = partials[1] - partials[0] * partials[0];
-		C[2] = partials[2] + 2 * Math.pow(partials[0], 3) - 3 * partials[0] * partials[1];
 	}
 }

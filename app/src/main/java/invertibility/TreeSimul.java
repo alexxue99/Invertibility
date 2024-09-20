@@ -3,7 +3,7 @@ package invertibility;
 import java.util.Random;
 
 /**
- * Class used to simulate the length process on a star tree with N leaves.
+ * Class used to simulate the TKF91 process on a star tree with N leaves.
  */
 public class TreeSimul {
 	private double lambda;
@@ -12,42 +12,29 @@ public class TreeSimul {
 	private double pi0;
 	private String root;
 	private int M;
-	private int N;
 
 	private String[] seqLeaves; // contains information about the sequences at the leaves
 
 	private Random rand;
 
 	/**
-	 * Constructor to initialize tree.
+	 * Constructor to initialize a TreeSimul object.
 	 * 
-	 * @param lambda
-	 *               is insertion rate.
-	 * @param mu
-	 *               is deletion rate.
-	 * @param nu
-	 *               is substitution rate.
-	 * @param pi0
-	 *               is probability that a character is 0.
-	 * @param root
-	 *               is the string at the root.
+	 * @param lambda the insertion rate
+	 * @param mu     the deletion rate
+	 * @param nu     the substitution rate
+	 * @param pi0    the probability that a character is 0
+	 * @param root   the string at the root
 	 */
 
-	public TreeSimul(double lambda, double mu, double nu, double pi0, String root,
-			int N) {
+	public TreeSimul(double lambda, double mu, double nu, double pi0, String root) {
 		this.lambda = lambda;
 		this.mu = mu;
 		this.nu = nu;
 		this.pi0 = pi0;
 		this.root = root;
 		M = root.length();
-		this.N = N;
-
-		seqLeaves = new String[N];
-
 		rand = new Random();
-
-		runLengthProcess();
 	}
 
 	/** Returns a variable with exponential distribution with parameter var. */
@@ -62,8 +49,12 @@ public class TreeSimul {
 	}
 
 	/**
-	 * Evolves string s along an edge, using the length process
+	 * Evolves string s along an edge for time t, using the TKF91 process
 	 * parameters.
+	 * 
+	 * @param s the string to evolve
+	 * @param t the time
+	 * @return the evolved string
 	 */
 	private String evolve(String s, double t) {
 		while (t > 0) {
@@ -108,6 +99,14 @@ public class TreeSimul {
 		return s;
 	}
 
+	/**
+	 * Approximates the average length of the root sequence after time t by taking
+	 * an average over num trials.
+	 * 
+	 * @param t   the time
+	 * @param num the number of trials
+	 * @return the approximate length
+	 */
 	public double approxLength(double t, int num) {
 		int sum = 0;
 
@@ -118,18 +117,37 @@ public class TreeSimul {
 		return (double) sum / num;
 	}
 
-	public double pairwiseDistance(double tw, double t1, double t2, double l1_approx, double l2_approx, double mean1, double mean2) {
+	/**
+	 * Runs the tree process for a forked tree. The root node is connected a to a
+	 * node w with length tw, and the node w is connected to two nodes u and v with
+	 * lengths t1 and t2.
+	 * Returns (Lu - mu)(Lv - mv).
+	 * 
+	 * @param tw    the distance from root to w
+	 * @param t1    the distance from w to u
+	 * @param t2    the distance from w to v
+	 * @param mean1 the average length mu of the sequence at u
+	 * @param mean2 the average length mv of the sequence at v
+	 * @return the covariance component for this instance of a forked tree
+	 */
+	public double covarianceComponent(double tw, double t1, double t2, double mean1,
+			double mean2) {
 		String s = evolve(root, tw);
 
 		int l1 = evolve(s, t1).length();
 		int l2 = evolve(s, t2).length();
 
-		return (l1 - l1_approx - mean1) * (l2 - l2_approx - mean2);
+		return (l1 - mean1) * (l2 - mean2);
 	}
 
-	/** Simulates the length process on the whole tree. */
-	public void runLengthProcess() {
-		for (int i = 0; i < N; i++) {
+	/**
+	 * Resets the leaves of the tree and simulates the TKF91 process on the whole
+	 * tree.
+	 */
+	public void runTKF91Process(int n) {
+		seqLeaves = new String[n];
+
+		for (int i = 0; i < n; i++) {
 			seqLeaves[i] = evolve(root, 1);
 		}
 	}

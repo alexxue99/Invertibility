@@ -22,12 +22,18 @@ import org.jfree.chart.renderer.category.CategoryItemRendererState;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 
+/**
+ * Class that extends BoxAndWhiskerRenderer, a class from jfreechart. Slight
+ * modications have been made so that the circle representing the mean is
+ * smaller.
+ */
 public class ExtendedBoxAndWhiskerRenderer extends BoxAndWhiskerRenderer
       implements Cloneable, PublicCloneable, Serializable {
    public ExtendedBoxAndWhiskerRenderer() {
       super();
    }
 
+   @Override
    public void drawVerticalItem(Graphics2D g2, CategoryItemRendererState state, Rectangle2D dataArea, CategoryPlot plot,
          CategoryAxis domainAxis, ValueAxis rangeAxis, CategoryDataset dataset, int row, int column) {
       BoxAndWhiskerCategoryDataset bawDataset = (BoxAndWhiskerCategoryDataset) dataset;
@@ -99,7 +105,8 @@ public class ExtendedBoxAndWhiskerRenderer extends BoxAndWhiskerRenderer
             yyAverage = rangeAxis.valueToJava2D(yMedian.doubleValue(), dataArea, location);
             aRadius = state.getBarWidth() / 16.0;
             if (yyAverage > dataArea.getMinY() - aRadius && yyAverage < dataArea.getMaxY() + aRadius) {
-               Ellipse2D.Double avgEllipse = new Ellipse2D.Double(xx + 7.0 * aRadius, yyAverage - aRadius, aRadius * 2.0,
+               Ellipse2D.Double avgEllipse = new Ellipse2D.Double(xx + 7.0 * aRadius, yyAverage - aRadius,
+                     aRadius * 2.0,
                      aRadius * 2.0);
                g2.fill(avgEllipse);
                g2.draw(avgEllipse);
@@ -129,6 +136,7 @@ public class ExtendedBoxAndWhiskerRenderer extends BoxAndWhiskerRenderer
 
    }
 
+   @Override
    public boolean equals(Object obj) {
       if (obj == this) {
          return true;

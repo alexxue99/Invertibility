@@ -1,7 +1,9 @@
 package invertibility;
 
-import java.util.List;
-
+/**
+ * Class that inverts the TKF91 process based on given data on the covariance
+ * between two nodes u and v to estimate the pairwise distances between them.
+ */
 public class InvertPairwiseDistance extends Invert {
     private double lambda2; // lambda*t for second tree
     private double mu2; // mu*t for second tree
@@ -12,8 +14,14 @@ public class InvertPairwiseDistance extends Invert {
     private double wd; // distance for the common ancestor w
 
     /**
-     * Inverts the process based on given data on the lengths of the sequences at
-     * the leaves to estimate the pairwise distances between leaves.
+     * Constructor to initialize an InvertPairwiseDistance object.
+     * 
+     * @param lambda     the insertion rate
+     * @param mu         the deletion rate
+     * @param tu         the distance from root to u
+     * @param tv         the distance from root to v
+     * @param M          the length of the root sequence
+     * @param covariance the covariance between Lu and Lv
      */
     public InvertPairwiseDistance(double lambda, double mu, double tu, double tv, int M, double covariance) {
         this.lambda = lambda * tu;
@@ -38,7 +46,6 @@ public class InvertPairwiseDistance extends Invert {
 
         pwd = Math.log(exp) * -2;
         pwd *= mu / (mu - lambda);
-        System.out.println(pwd);
     }
 
     // estimates mu * t_w

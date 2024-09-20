@@ -1,105 +1,27 @@
 package invertibility;
 
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.GraphicsEnvironment;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
-import org.jfree.chart.renderer.xy.XYErrorRenderer;
 import org.jfree.chart.swing.ApplicationFrame;
 import org.jfree.chart.swing.ChartPanel;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
-import org.jfree.data.xy.XYIntervalDataItem;
-import org.jfree.data.xy.XYIntervalSeries;
-import org.jfree.data.xy.XYIntervalSeriesCollection;
 
-/** Class used to chart estimated data vs. exact values. */
+/**
+ * Class used to plot estimated data vs. exact values in a box and whisker plot.
+ */
 public class Chart {
 
 	static class Chart_AWT extends ApplicationFrame {
-		// error bar chart
-		public Chart_AWT(String xAxis, String applicationTitle, String chartTitle, String var, double[] estimated,
-				double[] deviation, double exact,
-				int[] N, boolean plain) {
-			super(applicationTitle);
-
-			XYIntervalSeriesCollection<String> valuesDataSet = new XYIntervalSeriesCollection<String>();
-			XYIntervalSeries<String> values = new XYIntervalSeries<String>("values");
-			System.out.println("------\n" + var);
-			for (int i = 0; i < N.length; i++) {
-				XYIntervalDataItem val;
-				System.out.println(estimated[i] + " " + deviation[i]);
-				double lower = (exact == -1) ? estimated[i] : estimated[i] - deviation[i];
-				val = new XYIntervalDataItem(N[i], N[i], N[i], estimated[i], estimated[i] + deviation[i],
-						lower);
-				values.add(val, true);
-			}
-
-			valuesDataSet.addSeries(values);
-
-			XYIntervalSeries<String> exactValue = new XYIntervalSeries<String>("");
-			valuesDataSet.addSeries(exactValue);
-
-			JFreeChart chart = ChartFactory.createScatterPlot(chartTitle, xAxis, var, valuesDataSet,
-					PlotOrientation.VERTICAL,
-					true, false, false);
-
-			@SuppressWarnings("unchecked")
-			XYPlot<String> plot = (XYPlot<String>) chart.getPlot();
-			XYErrorRenderer errorRenderer = new XYErrorRenderer();
-			plot.setRenderer(errorRenderer);
-
-			ValueMarker marker = new ValueMarker(exact);
-			marker.setPaint(Color.BLUE);
-			plot.addRangeMarker(marker);
-			errorRenderer.setSeriesPaint(0, Color.RED);
-			errorRenderer.setSeriesVisibleInLegend(0, false);
-
-			errorRenderer.setSeriesPaint(1, Color.BLUE);
-			errorRenderer.setSeriesLinesVisible(1, true);
-			errorRenderer.setSeriesShapesVisible(1, false);
-			errorRenderer.setSeriesVisibleInLegend(1, false);
-
-			plot.setBackgroundPaint(Color.WHITE);
-
-			String path = "C:\\Users\\alexx\\workspace\\Invertibility\\cm\\cmunrm.ttf";
-			Font customFont = null;
-			try {
-				customFont = Font.createFont(Font.TRUETYPE_FONT, new File(path));
-				GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-				ge.registerFont(customFont);
-				System.out.println("SUCCESS");
-			} catch (Exception e) {
-				System.out.println("Font error");
-			}
-
-			customFont = new Font("CMU Serif", plain ? Font.PLAIN : Font.ITALIC, 20);
-			plot.getRangeAxis().setLabelFont(customFont);
-
-			customFont = new Font("CMU Serif", Font.ITALIC, 20);
-			plot.getDomainAxis().setLabelFont(customFont);
-
-			ChartPanel chartPanel = new ChartPanel(chart);
-			chartPanel.setPreferredSize(new java.awt.Dimension(540, 360));
-
-			setContentPane(chartPanel);
-		}
-
-		// box and whisker plot
 		public Chart_AWT(String xAxis, String applicationTitle, String chartTitle, String var, double[][] estimated,
 				double exact,
-				int[] N) {
+				int[] N, Boolean meanVisible) {
 			super(applicationTitle);
 
 			DefaultBoxAndWhiskerCategoryDataset<String, Integer> dataset = new DefaultBoxAndWhiskerCategoryDataset<String, Integer>();
@@ -127,35 +49,12 @@ public class Chart {
 			renderer.setSeriesVisibleInLegend(0, false);
 
 			renderer.setFillBox(false);
-			renderer.setMeanVisible(false);
-			
+			renderer.setMeanVisible(meanVisible);
+
 			renderer.setMaximumBarWidth(0.10);
 			renderer.setWhiskerWidth(0.6);
 
-			String reg = "C:\\Users\\alexx\\workspace\\Invertibility\\cm\\cmr12.ttf";
-			String italic = "C:\\Users\\alexx\\workspace\\Invertibility\\cm\\cmmi10.ttf";
-			Font customFont = null;
-			try {
-				customFont = Font.createFont(Font.TRUETYPE_FONT, new File(reg));
-				GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-				ge.registerFont(customFont);
-
-				customFont = Font.createFont(Font.TRUETYPE_FONT, new File(italic));
-				ge.registerFont(customFont);
-			} catch (Exception e) {
-				System.out.println("Font error");
-			}
-
-			customFont = new Font("cmmi10", Font.ITALIC, 15);
-			//customFont = new Font("cmr12", Font.PLAIN, 15);
-			plot.getRangeAxis().setLabelFont(customFont);
-			plot.getDomainAxis().setLabelFont(customFont);
-
-			customFont = new Font("cmr12", Font.PLAIN, 15);
-			plot.getRangeAxis().setTickLabelFont(customFont);
-			plot.getDomainAxis().setTickLabelFont(customFont);
-
-			JFreeChart chart = new JFreeChart("", customFont, plot, true);
+			JFreeChart chart = new JFreeChart("", plot);
 			chart.setBackgroundPaint(Color.WHITE);
 			ChartPanel chartPanel = new ChartPanel(chart);
 			chartPanel.setPreferredSize(new java.awt.Dimension(540, 360));
@@ -164,49 +63,11 @@ public class Chart {
 		}
 	}
 
-	public static void ErrorChart(String xAxis, String var, double[] estimated, double[] deviation,
-			double exact, int[] N) {
-		boolean plain = false;
-		String translatedVar = var;
-		switch (var) {
-			case "gamma":
-				translatedVar = "\u00B0";
-				break;
-			case "beta":
-				translatedVar = "\u00AF";
-				break;
-			case "nu":
-				translatedVar = "\u00BA";
-				break;
-			case "difference":
-				plain = true;
-		}
-
-		Chart_AWT chart = new Chart_AWT(xAxis, var + " vs. " + xAxis, "", translatedVar,
-				estimated, deviation, exact,
-				N, plain);
-		chart.pack();
-		chart.setVisible(true);
-	}
-
 	public static void BoxWhiskerChart(String xAxis, String var, double[][] estimated,
-			double exact, int[] N) {
-		String translatedVar = var;
-		switch (var) {
-			case "gamma":
-				translatedVar = "\u00B0";
-				break;
-			case "beta":
-				translatedVar = "\u00AF";
-				break;
-			case "nu":
-				translatedVar = "\u00BA";
-				break;
-		}
-
-		Chart_AWT chart = new Chart_AWT(xAxis, var + " vs. " + xAxis, "", translatedVar,
+			double exact, int[] N, Boolean meanVisible) {
+		Chart_AWT chart = new Chart_AWT(xAxis, var + " vs. " + xAxis, "", var,
 				estimated, exact,
-				N);
+				N, meanVisible);
 		chart.pack();
 		chart.setVisible(true);
 	}
