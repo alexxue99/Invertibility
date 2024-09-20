@@ -248,8 +248,11 @@ public class Main {
 		TreeSimul treeSimul = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT);
 
 		// values of N to use for the simulation
+		// the 10^5 and 10^6 values will take some time to run
+		// if you just want to quickly see that the code works, try only N = {10^2, 10^3, 10^4}
 		int[] N = { (int) Math.pow(10, 3), (int) Math.pow(10, 4), (int) Math.pow(10,
 				5), (int) Math.pow(10, 6) };
+
 		int NUM_SAMPLES = 50; // number of trials for each N
 
 		starTreeLength(treeSimul, N, NUM_SAMPLES);
