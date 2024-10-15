@@ -4,6 +4,6 @@ This application inverts the TKF91 process described in the process for ultramet
 
 The class Main.java contains code that tests these four classes. There are four methods provided, each testing a class by creating trees for various values of N for some number of trials. It then plots the results in charts. The plotting uses JFreeChart 2.0.0, a free library that can be found at https://www.jfree.org/index.html.
 
-This project uses Gradle to handle the JFreeChart dependency. With Gradle, the following two commands may be used to compile Main.java and run the created .jar file:<br/>
+This project uses Gradle to handle the JFreeChart and ejml dependency. With Gradle, the following two commands may be used to compile Main.java and run the created .jar file:<br/>
 "gradlew.bat build"<br/>
 "gradlew.bat runJar"
