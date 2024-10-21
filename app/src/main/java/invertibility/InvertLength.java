@@ -2,8 +2,7 @@ package invertibility;
 
 /**
  * Class used to invert the length process based on given data on the lengths of
- * the sequences at
- * the leaves to estimate gamma, beta, and M.
+ * the sampled sequences to estimate gamma, beta, and M.
  */
 public class InvertLength extends Invert {
     private double C2prime;
@@ -12,10 +11,9 @@ public class InvertLength extends Invert {
     /**
      * Constructor to initialize an InvertLength object.
      * 
-     * @param tree a TreeLeaves object containing the sequences at the leaves of the
-     *             tree
+     * @param tree a LeafSamples object containing the sampled sequences
      */
-    public InvertLength(TreeLeaves tree) {
+    public InvertLength(LeafSamples tree) {
         super(tree);
 
         calcPartials();
@@ -28,7 +26,7 @@ public class InvertLength extends Invert {
     }
 
     protected void calcPartials() {
-        partials = factorialMoments(tree.getSeqLeavesLengths());
+        partials = factorialMoments(tree.getSamplesLengths());
     }
 
     private void updateCs() {

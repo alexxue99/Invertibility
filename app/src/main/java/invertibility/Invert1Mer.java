@@ -1,8 +1,8 @@
 package invertibility;
 
 /**
- * Class to invert the 1mer process based on given data on the sequences at the
- * leaves, as well as on mu, lambda, and M, to estimate nu and a.
+ * Class to invert the 1mer process based on given data on the sampled
+ * sequences, as well as on mu, lambda, and M, to estimate nu and a.
  */
 public class Invert1Mer extends Invert {
     private double pi0;
@@ -26,10 +26,9 @@ public class Invert1Mer extends Invert {
      * @param pi0    the probability that a new character is 0 after substitution or
      *               insertion
      * @param M      the length of the root sequence
-     * @param tree   a TreeLeaves object containing the sequences at the leaves of
-     *               the tree
+     * @param tree   a LeafSamples object containing the sampled sequences
      */
-    public Invert1Mer(double lambda, double mu, double pi0, int M, TreeLeaves tree) {
+    public Invert1Mer(double lambda, double mu, double pi0, int M, LeafSamples tree) {
         super(tree);
 
         this.lambda = lambda;

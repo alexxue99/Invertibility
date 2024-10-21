@@ -2,10 +2,10 @@ package invertibility;
 
 /**
  * Class used to invert the TKF91 process parameters, given the
- * sequences at the leaves of a tree.
+ * sampled sequences.
  */
 public abstract class Invert {
-	protected TreeLeaves tree;
+	protected LeafSamples tree;
 	protected int N;
 
 	protected double mu;
@@ -24,7 +24,7 @@ public abstract class Invert {
 	public Invert() {
 	}
 
-	public Invert(TreeLeaves tree) {
+	public Invert(LeafSamples tree) {
 		this.tree = tree;
 		N = tree.getN();
 

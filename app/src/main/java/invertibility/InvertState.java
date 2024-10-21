@@ -5,9 +5,8 @@ import java.util.Arrays;
 import org.ejml.simple.SimpleMatrix;
 
 /**
- * Class used to invert the TKF91 process based on given data on the sequences
- * at
- * the leaves, as well as on mu, lambda, M, nu and pi0 to estimate the initial
+ * Class used to invert the TKF91 process based on given data on the sampled
+ * sequences, as well as on mu, lambda, M, nu and pi0 to estimate the initial
  * state.
  */
 public class InvertState extends Invert {
@@ -22,11 +21,9 @@ public class InvertState extends Invert {
 	 * @param M      the length of the root sequence
 	 * @param pi0    the probability a character is 0 after substitution or
 	 *               insertion
-	 * @param tree   a TreeLeaves object containing the sequences at the leaves of
-	 *               the
-	 *               tree
+	 * @param tree   a LeafSamples object containing the sampled sequences
 	 */
-	public InvertState(double lambda, double mu, double nu, int M, double pi0, TreeLeaves tree) {
+	public InvertState(double lambda, double mu, double nu, int M, double pi0, LeafSamples tree) {
 		super(tree);
 
 		this.lambda = lambda;

@@ -12,7 +12,7 @@ public class Main {
 	 * @param N           an array containing the values of N to simulate
 	 * @param NUM_SAMPLES the number of trials to use for each N
 	 */
-	public static void starTreeLength(TreeSimul treeSimul, int[] N,
+	public static void testInvertLength(TreeSimul treeSimul, int[] N,
 			int NUM_SAMPLES) {
 		double GAMMA = treeSimul.getLambda() / treeSimul.getMu();
 		double BETA = Math.exp(treeSimul.getLambda() - treeSimul.getMu());
@@ -29,9 +29,9 @@ public class Main {
 
 			for (int sample = 0; sample < NUM_SAMPLES; sample++) {
 				treeSimul.runTKF91Process(N[trial]);
-				TreeLeaves sampleLeaves = treeSimul.toTreeLeaves();
+				LeafSamples samples = treeSimul.toLeafSamples();
 
-				InvertLength inverted = new InvertLength(sampleLeaves);
+				InvertLength inverted = new InvertLength(samples);
 
 				gammaSample[sample] = inverted.getGamma();
 				betaSample[sample] = inverted.getBeta();
@@ -64,7 +64,7 @@ public class Main {
 	 * @param N           an array containing the values of N to simulate
 	 * @param NUM_SAMPLES the number of trials to use for each N
 	 */
-	public static void starTree1Mer(TreeSimul treeSimul, int[] N,
+	public static void testInvert1Mer(TreeSimul treeSimul, int[] N,
 			int NUM_SAMPLES) {
 		int numOnes = 0;
 		for (char c : treeSimul.getRoot().toCharArray()) {
@@ -88,10 +88,10 @@ public class Main {
 
 			for (int sample = 0; sample < NUM_SAMPLES; sample++) {
 				treeSimul.runTKF91Process(N[trial]);
-				TreeLeaves sampleLeaves = treeSimul.toTreeLeaves();
+				LeafSamples samples = treeSimul.toLeafSamples();
 
 				Invert1Mer inverted = new Invert1Mer(treeSimul.getLambda(), treeSimul.getMu(), treeSimul.getPi0(),
-						treeSimul.getM(), sampleLeaves);
+						treeSimul.getM(), samples);
 
 				nuSample[sample] = inverted.getNu();
 				aSample[sample] = inverted.getA();
@@ -118,7 +118,7 @@ public class Main {
 	 * @param N           an array containing the values of N to simulate
 	 * @param NUM_SAMPLES the number of trials to use for each N
 	 */
-	public static void starTreeState(TreeSimul treeSimul, int[] N, int NUM_SAMPLES) {
+	public static void testInvertState(TreeSimul treeSimul, int[] N, int NUM_SAMPLES) {
 		String[] root = new String[N.length];
 
 		double[][] diff = new double[N.length][NUM_SAMPLES];
@@ -131,10 +131,10 @@ public class Main {
 
 			for (int sample = 0; sample < NUM_SAMPLES; sample++) {
 				treeSimul.runTKF91Process(N[trial]);
-				TreeLeaves sampleLeaves = treeSimul.toTreeLeaves();
+				LeafSamples samples = treeSimul.toLeafSamples();
 
 				InvertState inverted = new InvertState(treeSimul.getLambda(), treeSimul.getMu(), treeSimul.getNu(),
-						treeSimul.getM(), treeSimul.getPi0(), sampleLeaves);
+						treeSimul.getM(), treeSimul.getPi0(), samples);
 
 				String sampleRootState = inverted.getRootState();
 				for (int i = 0; i < treeSimul.getM(); i++) {
@@ -168,7 +168,7 @@ public class Main {
 	 * @param N           an array containing the values of N to simulate
 	 * @param NUM_SAMPLES the number of trials to use for each N
 	 */
-	public static void starTreePairwiseDistance(TreeSimul treeSimul, int[] N, int NUM_SAMPLES) {
+	public static void testInvertPairwiseDistance(TreeSimul treeSimul, int[] N, int NUM_SAMPLES) {
 		final double tw = 1; // distance from root to w
 		final double t1 = 2; // distance from w to u
 		final double t2 = 3; // distance from w to v
@@ -249,12 +249,12 @@ public class Main {
 
 		// values of N to use for the simulation
 		// the 10^5 and 10^6 values will take some time to run
-		// if you just want to quickly see that the code works, try only N = {10^2, 10^3, 10^4}
+		// if you just want to quickly see that the code works, try only N = {10^2,
+		// 10^3, 10^4}
 		int[] N = { (int) Math.pow(10, 3), (int) Math.pow(10, 4), (int) Math.pow(10,
 				5), (int) Math.pow(10, 6) };
-
 		int NUM_SAMPLES = 50; // number of trials for each N
 
-		starTreeLength(treeSimul, N, NUM_SAMPLES);
+		testInvertLength(treeSimul, N, NUM_SAMPLES);
 	}
 }

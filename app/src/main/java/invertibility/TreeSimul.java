@@ -3,7 +3,7 @@ package invertibility;
 import java.util.Random;
 
 /**
- * Class used to simulate the TKF91 process on a star tree with N leaves.
+ * Class used to simulate the TKF91 process for a leaf of the phylogeny.
  */
 public class TreeSimul {
 	private double lambda;
@@ -13,7 +13,7 @@ public class TreeSimul {
 	private String root;
 	private int M;
 
-	private String[] seqLeaves; // contains information about the sequences at the leaves
+	private String[] samples; // contains information about the sampled sequences
 
 	private Random rand;
 
@@ -141,22 +141,22 @@ public class TreeSimul {
 	}
 
 	/**
-	 * Resets the leaves of the tree and simulates the TKF91 process on the whole
+	 * Resets the samples and simulates the TKF91 process on the whole
 	 * tree.
 	 */
 	public void runTKF91Process(int n) {
-		seqLeaves = new String[n];
+		samples = new String[n];
 
 		for (int i = 0; i < n; i++) {
-			seqLeaves[i] = evolve(root, 1);
+			samples[i] = evolve(root, 1);
 		}
 	}
 
 	/**
-	 * Transforms a TreeSimul object into a TreeLeaves object.
+	 * Transforms a TreeSimul object into a LeafSamples object.
 	 */
-	public TreeLeaves toTreeLeaves() {
-		return new TreeLeaves(seqLeaves);
+	public LeafSamples toLeafSamples() {
+		return new LeafSamples(samples);
 	}
 
 	public double getLambda() {
@@ -183,7 +183,7 @@ public class TreeSimul {
 		return M;
 	}
 
-	public String[] getSeqLeaves() {
-		return seqLeaves;
+	public String[] getSamples() {
+		return samples;
 	}
 }
