@@ -34,12 +34,11 @@ public class TreeSimul {
 		this.pi0 = pi0;
 		this.root = root;
 		M = root.length();
-		rand = new Random();
+		rand = new Random(123); // fixed seed for reproducibility
 	}
 
 	/** Returns a variable with exponential distribution with parameter var. */
 	private double getExp(double var) {
-		Random rand = new Random();
 		return Math.log(1 - rand.nextDouble()) / (-var);
 	}
 

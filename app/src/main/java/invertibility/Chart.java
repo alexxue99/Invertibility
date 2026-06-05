@@ -2,6 +2,7 @@ package invertibility;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jfree.chart.JFreeChart;
@@ -65,10 +66,38 @@ public class Chart {
 
 	public static void BoxWhiskerChart(String xAxis, String var, double[][] estimated,
 			double exact, int[] N, Boolean meanVisible) {
+		estimated = trim(estimated);
 		Chart_AWT chart = new Chart_AWT(xAxis, var + " vs. " + xAxis, "", var,
 				estimated, exact,
 				N, meanVisible);
 		chart.pack();
 		chart.setVisible(true);
+	}
+
+	/**
+	 * Returns a copy of the given data array with any NaN elements deleted.
+	 * 
+	 * @param data the array to be trimmed
+	 * @return a copy of data with NaN elements deleted.
+	 */
+	private static double[] trim(double[] data) {
+		Arrays.sort(data);
+
+		int index = data.length;
+		while (index > 0 && Double.isNaN(data[--index]))
+			;
+
+		if (Double.isNaN(data[index]))
+			return new double[] {};
+
+		return Arrays.copyOfRange(data, 0, index + 1);
+	}
+
+	private static double[][] trim(double[][] data) {
+		double[][] trimmed = new double[data.length][];
+		for (int i = 0; i < data.length; i++) {
+			trimmed[i] = data[i];
+		}
+		return trimmed;
 	}
 }

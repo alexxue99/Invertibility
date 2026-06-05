@@ -39,19 +39,15 @@ public abstract class Invert {
 		// time t,
 		// by using the expected value of the kth factorial moment of the length process
 		double[] partials = new double[3];
-		for (int i = 0; i < N;) {
+		for (int i = 0; i < N; i++) {
 			long length = array[i];
-			long[] lengths = new long[] { length, length * (length - 1), length * (length - 1) * (length - 2) };
 
-			i++;
-			for (int j = 0; j < 3; j++) {
-				try {
-					partials[j] += (lengths[j] - partials[j]) / i;
-				} catch (ArithmeticException e) {
-					System.out.println("Error in partial computation.");
-				}
-			}
+			partials[0] += length;
+			partials[1] += length * (length - 1);
+			partials[2] += length * (length - 1) * (length - 2);
 		}
+
+		for (int j = 0; j < 3; j++) partials[j] /= N;
 
 		return partials;
 	}
