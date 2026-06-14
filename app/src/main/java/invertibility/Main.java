@@ -455,12 +455,22 @@ public class Main {
 	public static void main(String[] args) {
 		// set TKF91 process parameters
 		boolean longM = false; // whether to use a long root sequence (250) or a short one (8)
-		
+		boolean swap = true; // whether to swap the insertion and deletion rates
+
 		String tag = (longM) ? "longM" : "shortM"; // tag for output files
+		if (swap) {
+			tag += "_swap";
+		}
+
 		int M = (longM) ? 250 : 8; // desired length of root sequence
 
 		double LAMBDA = .05; // insertion rate
 		double MU = 0.075; // deletion rate
+		if (swap) {
+			double temp = LAMBDA;
+			LAMBDA = MU;
+			MU = temp;
+		}
 		double NU = 1; // substitution rate
 		double PI0 = .5; // probability a character is a 0 after substitution or insertion
 		
@@ -483,10 +493,10 @@ public class Main {
 
 		// testInvertLength(treeSimul, N, NUM_SAMPLES, tag);
 		// testInvert1Mer(treeSimul, N, NUM_SAMPLES, tag);
-		//testInvertState(treeSimul, N, NUM_SAMPLES, tag);
 		// testInvertPairwiseDistance(treeSimul, N, NUM_SAMPLES, tag);
-
 		// testInvertLength1Mer(treeSimul, N, NUM_SAMPLES, tag);
+
+		testInvertState(treeSimul, N, NUM_SAMPLES, tag);
 		testInvertLength1MerState(treeSimul, N, NUM_SAMPLES, tag);
 	}
 }

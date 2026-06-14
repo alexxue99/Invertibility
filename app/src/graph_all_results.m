@@ -1,4 +1,4 @@
-files = dir(fullfile('../../app/data/', '*.csv'));
+files = dir(fullfile('../../app/data/', '*_swap.csv'));
 filenames = string({files.name});
 filenames = erase(filenames, ".csv");
 

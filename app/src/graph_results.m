@@ -14,7 +14,12 @@ end
 
 hold on;
 
-shortM = endsWith(filename, "shortM");
+if endsWith(filename, "swap")
+    shortM = endsWith(filename, "shortM_swap");
+else
+    shortM = endsWith(filename, "shortM");
+end
+
 if shortM
     Ns = [3, 4, 5, 6];
     xaxis = '$\log N$';
