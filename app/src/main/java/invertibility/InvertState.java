@@ -83,7 +83,7 @@ public class InvertState extends Invert {
 	private SimpleMatrix V() {
 		double[][] V = new double[M][M];
 		for (int i = 0; i < M; i++) {
-			double eta = eta(1.01 + i / 1.0);
+			double eta = eta(5.01 + i / 1.0);
 
 			V[i][0] = 1;
 			for (int j = 1; j < M; j++) {
@@ -96,7 +96,7 @@ public class InvertState extends Invert {
 	private SimpleMatrix Psi() {
 		double[] Psi = new double[M];
 		for (int i = 0; i < M; i++) {
-			Psi[i] = psi(1.01 + i / 1.0);
+			Psi[i] = psi(5.01 + i / 1.0);
 		}
 
 		return SimpleMatrix.diag(Psi);
@@ -106,8 +106,8 @@ public class InvertState extends Invert {
 		double[] U = new double[M];
 
 		for (int i = 0; i < M; i++) {
-			double p0 = p(1.01 + i / 1.0, true);
-			double secondTerm = phi(1.01 + i / 1.0) * (1 - Math.pow(eta(1.01 + i / 1.0), M));
+			double p0 = p(5.01 + i / 1.0, true);
+			double secondTerm = phi(5.01 + i / 1.0) * (1 - Math.pow(eta(5.01 + i / 1.0), M));
 
 			U[i] = p0 - pi0 * secondTerm;
 		}

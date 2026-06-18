@@ -168,6 +168,17 @@ public class Main {
 			System.out.println((System.nanoTime() - t) / 1e9 + " seconds has passed, trial " + trial + ".");
 			System.out.println("estimated root: " + root[trial]);
 			System.out.println("actual root:    " + treeSimul.getRoot());
+
+			// print out average of differences for this trial
+			double avgDiff = 0;
+			for (double d : diffSample) {
+				// ignore NaN values
+				if (Double.isNaN(d))
+					continue;
+				avgDiff += d;
+			}
+			avgDiff /= NUM_SAMPLES;
+			System.out.println("average difference: " + avgDiff);
 			t = System.nanoTime();
 		}
 
@@ -455,48 +466,58 @@ public class Main {
 	public static void main(String[] args) {
 		// set TKF91 process parameters
 		boolean longM = false; // whether to use a long root sequence (250) or a short one (8)
-		boolean swap = true; // whether to swap the insertion and deletion rates
 
-		String tag = (longM) ? "longM" : "shortM"; // tag for output files
-		if (swap) {
-			tag += "_swap";
+		// loop over swap in [false, true] to swap insertion and deletion rates
+
+		for (boolean swap : new boolean[] { false, true }) {
+			// tag for output files, manually change tag to "20shortM" if M = 20
+			String tag = (longM) ? "longM" : "shortM";
+
+			if (swap) {
+				tag += "_swap";
+			}
+
+			// desired length of root sequence, manually change the 8 to 20 if you want M = 20
+			int M = (longM) ? 250 : 8; 
+
+			double LAMBDA = .05; // insertion rate
+			double MU = 0.075; // deletion rate
+			if (swap) {
+				double temp = LAMBDA;
+				LAMBDA = MU;
+				MU = temp;
+			}
+			double NU = 1; // substitution rate
+			double PI0 = .5; // probability a character is a 0 after substitution or insertion
+
+			Random rand = new Random(123); // fixed seed for reproducibility
+			StringBuilder sb = new StringBuilder(M);
+
+			for (int i = 0; i < M; i++) {
+				sb.append(rand.nextInt(2)); // generates 0 or 1
+			}
+
+			String ROOT = sb.toString();
+			// ROOT = "01010101"; // you can change the root sequence here
+
+			// create TreeSimul object using TKF91 process parameters
+			TreeSimul treeSimul = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT);
+
+			// values of N to use for the simulation
+			int[] N = (longM) ? new int[] { 25, 100, 400 } : new int[] { (int) 1e3, (int) 1e4, (int) 1e5, (int) 1e6 };
+			int NUM_SAMPLES = 50; // number of trials for each N
+
+			if (longM) {
+				// Tests to run for long M
+				testInvertLength(treeSimul, N, NUM_SAMPLES, tag);
+				testInvert1Mer(treeSimul, N, NUM_SAMPLES, tag);
+				testInvertPairwiseDistance(treeSimul, N, NUM_SAMPLES, tag);
+				testInvertLength1Mer(treeSimul, N, NUM_SAMPLES, tag);
+			} else {
+				// Tests to run for short M
+				testInvertState(treeSimul, N, NUM_SAMPLES, tag);
+				testInvertLength1MerState(treeSimul, N, NUM_SAMPLES, tag);
+			}
 		}
-
-		int M = (longM) ? 250 : 8; // desired length of root sequence
-
-		double LAMBDA = .05; // insertion rate
-		double MU = 0.075; // deletion rate
-		if (swap) {
-			double temp = LAMBDA;
-			LAMBDA = MU;
-			MU = temp;
-		}
-		double NU = 1; // substitution rate
-		double PI0 = .5; // probability a character is a 0 after substitution or insertion
-		
-		Random rand = new Random(123); // fixed seed for reproducibility
-		StringBuilder sb = new StringBuilder(M);
-
-		for (int i = 0; i < M; i++) {
-			sb.append(rand.nextInt(2)); // generates 0 or 1
-		}
-
-		String ROOT = sb.toString();
-		// ROOT = "01010101"; // you can change the root sequence here if you want
-
-		// create TreeSimul object using TKF91 process parameters
-		TreeSimul treeSimul = new TreeSimul(LAMBDA, MU, NU, PI0, ROOT);
-
-		// values of N to use for the simulation
-		int[] N = (longM) ? new int[] { 25, 100, 400 } : new int[] { (int) 1e3, (int) 1e4, (int) 1e5, (int) 1e6};
-		int NUM_SAMPLES = 50; // number of trials for each N
-
-		// testInvertLength(treeSimul, N, NUM_SAMPLES, tag);
-		// testInvert1Mer(treeSimul, N, NUM_SAMPLES, tag);
-		// testInvertPairwiseDistance(treeSimul, N, NUM_SAMPLES, tag);
-		// testInvertLength1Mer(treeSimul, N, NUM_SAMPLES, tag);
-
-		testInvertState(treeSimul, N, NUM_SAMPLES, tag);
-		testInvertLength1MerState(treeSimul, N, NUM_SAMPLES, tag);
 	}
 }
