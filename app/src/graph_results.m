@@ -4,6 +4,8 @@ V = A(1,1);      % exact value
 X = A(:,2:end);
 
 fig=figure;
+fig.Units = 'inches';
+fig.Position = [1 1 6 4];
 
 if ~startsWith(filename, 'diff')
     yline(V,'black--','LineWidth',.5);
@@ -48,18 +50,10 @@ set(gcf,'Renderer','painters');
 box on;
 hold off;
 
-lower = max(X(:));
-upper = min(X(:));
-
-for i = 1:size(X, 1)
-Q = quantile(X(i, :), [0.25 0.75]);
-IQR = Q(2) - Q(1);
-lower = min(lower, Q(1) - 1.5*IQR);
-upper = max(upper, Q(2) + 1.5*IQR);
-end
-
-lower = min(X(X >= lower));
-upper = max(X(X <= upper));
+h = findobj(gca, 'Tag', 'Upper Whisker');
+upper = max(arrayfun(@(x) max(x.YData), h));
+h = findobj(gca, 'Tag', 'Lower Whisker');
+lower = min(arrayfun(@(x) min(x.YData), h));
 pad = 0.05*(upper - lower);
 
 if pad == 0
@@ -68,6 +62,16 @@ end
 
 ylim([lower-pad upper+pad]);
 
-saveas(gcf, "../../app/draws/" + filename + ".eps", 'epsc')
-close all;
+ax = gca;
+ax.Units = 'normalized';
+ax.Position = [0.13 0.15 0.78 0.72];
+
+fig.PaperUnits = 'inches';
+fig.PaperPosition = [0 0 6 4];
+fig.PaperSize = [6 4];
+fig.PaperPositionMode = 'manual';
+
+print(fig, "../../app/draws/" + filename + ".eps", ...
+    '-depsc', '-vector', '-loose')
+%close all;
 end
